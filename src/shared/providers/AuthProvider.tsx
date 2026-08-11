@@ -17,9 +17,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(CURRENT_USER);
 
-  const login = async (_email?: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const login = async (email?: string) => {
     // Mock login delay
-    await new Promise((res) => setTimeout(res, 800));
+    await new Promise((res) => setTimeout(res, 300));
     setUser(CURRENT_USER);
   };
 

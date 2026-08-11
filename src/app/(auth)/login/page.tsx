@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, ArrowRight, Github, Chrome } from "lucide-react";
+import { Mail, Lock, ArrowRight, Github, Chrome, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { Card } from "@/shared/components/ui/Card";
@@ -14,14 +14,32 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState("alex.vance@mixchat.app");
   const [password, setPassword] = useState("••••••••••••");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+
+    if (!email.includes("@")) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+    if (password.length < 6) {
+      setErrorMessage("Password must be at least 6 characters.");
+      return;
+    }
+
     setIsLoading(true);
-    await login(email);
-    setIsLoading(false);
-    router.push("/feed");
+    try {
+      await login(email);
+      router.push("/feed");
+    } catch {
+      setErrorMessage("Invalid credentials. Please check your email and password.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSocialClick = (e: React.MouseEvent) => {
@@ -37,6 +55,13 @@ export default function LoginPage() {
         <p className="text-xs text-muted-foreground">Sign in to access your feed, chats, and live map</p>
       </div>
 
+      {errorMessage && (
+        <div className="mb-4 p-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-center gap-2 animate-in fade-in duration-200">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           type="email"
@@ -49,10 +74,20 @@ export default function LoginPage() {
         />
 
         <Input
-          type="password"
+          type={showPassword ? "text" : "password"}
           label="Password"
           placeholder="••••••••••••"
           icon={<Lock className="h-4 w-4" />}
+          rightElement={
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="text-muted-foreground hover:text-white transition-colors cursor-pointer"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          }
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -63,10 +98,17 @@ export default function LoginPage() {
             <input type="checkbox" defaultChecked className="rounded border-white/20 bg-white/5 text-purple-600 focus:ring-purple-500" />
             <span>Remember me</span>
           </label>
-          <Link href="/forgot-password" className="text-purple-400 hover:text-purple-300 transition-colors">Forgot password?</Link>
+          <Link href="/forgot-password" className="text-purple-400 hover:text-purple-300 transition-colors font-semibold">
+            Forgot password?
+          </Link>
         </div>
 
-        <Button type="submit" isLoading={isLoading} className="w-full h-12 text-base font-semibold shadow-lg shadow-purple-500/30">
+        <Button
+          type="submit"
+          isLoading={isLoading}
+          disabled={isLoading || !email.trim() || !password.trim()}
+          className="w-full h-12 text-base font-semibold shadow-lg shadow-purple-500/30"
+        >
           <span>Sign In</span>
           <ArrowRight className="h-4 w-4" />
         </Button>

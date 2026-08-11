@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Film, Upload, Music, MapPin, Globe, Users, Lock, Sparkles } from "lucide-react";
+import { Music, MapPin, Sparkles } from "lucide-react";
 import { Modal } from "@/shared/components/ui/Modal";
 import { Button } from "@/shared/components/ui/Button";
 import { useReels } from "@/shared/providers/ReelsProvider";

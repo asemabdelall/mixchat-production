@@ -3,11 +3,9 @@
 import React, { use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Hash, ArrowLeft, Flame, TrendingUp, Sparkles } from "lucide-react";
+import { Hash, ArrowLeft, Flame } from "lucide-react";
 import { MOCK_POSTS, MOCK_HASHTAGS } from "@/shared/services/mockData";
 import { FeedPostCard } from "@/features/feed/components/FeedPostCard";
-import { Card } from "@/shared/components/ui/Card";
-import { Button } from "@/shared/components/ui/Button";
 
 export default function HashtagPage({ params }: { params: Promise<{ tag: string }> }) {
   const resolvedParams = use(params);

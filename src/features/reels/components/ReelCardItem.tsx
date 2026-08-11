@@ -10,7 +10,6 @@ import {
   Volume2, 
   VolumeX, 
   Play, 
-  Pause, 
   Music, 
   MapPin, 
   UserPlus, 

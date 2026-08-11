@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Zap, Users, Film, Flame, MessageSquare, ArrowRight } from "lucide-react";
+import { Zap, Users, Film } from "lucide-react";
 import { Card } from "@/shared/components/ui/Card";
 import { MOCK_USERS, MOCK_STORIES } from "@/shared/services/mockData";
 

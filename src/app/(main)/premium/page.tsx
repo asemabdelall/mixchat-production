@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, Check, Zap, Shield, Crown, Flame } from "lucide-react";
+import { Sparkles, Check, Crown } from "lucide-react";
 import { MOCK_PREMIUM_PLANS } from "@/shared/services/mockData";
 import { PremiumPlan } from "@/types";
 import { Button } from "@/shared/components/ui/Button";
