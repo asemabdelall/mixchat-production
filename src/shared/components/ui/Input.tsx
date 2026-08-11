@@ -32,7 +32,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             {...props}
           />
-          {rightElement && <div className="absolute right-3">{rightElement}</div>}
+          {rightElement && (
+            <div className="absolute right-3 flex items-center justify-center z-10 pointer-events-auto">
+              {rightElement}
+            </div>
+          )}
         </div>
         {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
       </div>
@@ -40,3 +44,4 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   }
 );
 Input.displayName = "Input";
+
