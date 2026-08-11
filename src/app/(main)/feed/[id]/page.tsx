@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Heart, MessageCircle, Share2, Bookmark, Send, MapPin, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Share2, Send, MoreHorizontal } from "lucide-react";
 import { Avatar } from "@/shared/components/ui/Avatar";
 import { Button } from "@/shared/components/ui/Button";
 import { Input } from "@/shared/components/ui/Input";

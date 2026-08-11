@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Copy, Send, Film, Check, MessageSquare } from "lucide-react";
+import { X, Copy, Send, Film, Check } from "lucide-react";
 import { Reel } from "../types/reelTypes";
 import { MOCK_USERS } from "@/shared/services/mockData";
 import { Avatar } from "@/shared/components/ui/Avatar";

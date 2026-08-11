@@ -2,14 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Flame, Sparkles, Heart, MessageCircle, Play, Users, Eye, ArrowUpRight } from "lucide-react";
-import { MOCK_POSTS, MOCK_USERS, MOCK_STORIES } from "@/shared/services/mockData";
+import { Flame, Sparkles, Heart, MessageCircle, Play, Users, ArrowUpRight } from "lucide-react";
+import { MOCK_POSTS, MOCK_USERS } from "@/shared/services/mockData";
 import { Avatar } from "@/shared/components/ui/Avatar";
 import { Button } from "@/shared/components/ui/Button";
 import { Card } from "@/shared/components/ui/Card";
 import { StoryViewerModal } from "@/features/stories/components/StoryViewerModal";
 import { MediaViewerModal } from "@/features/feed/components/MediaViewerModal";
-import { Post, User } from "@/types";
+import { Post } from "@/types";
 
 interface ExploreV2GridProps {
   onStartChat: (userId: string) => void;

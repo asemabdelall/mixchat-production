@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Shield, QrCode, Smile, HardDrive, HelpCircle, LogOut, ChevronRight, Sparkles, Bell, Lock } from "lucide-react";
+import { User, Shield, QrCode, Smile, HardDrive, HelpCircle, LogOut, ChevronRight, Sparkles } from "lucide-react";
 import { useAuth } from "@/shared/providers/AuthProvider";
 import { Avatar } from "@/shared/components/ui/Avatar";
 import { Button } from "@/shared/components/ui/Button";

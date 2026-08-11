@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Heart, MessageCircle, UserPlus, Ghost, CheckCheck, Bell, Sparkles, AtSign, Check, X, ShieldAlert } from "lucide-react";
-import { MOCK_NOTIFICATIONS, MOCK_USERS } from "@/shared/services/mockData";
+import { Heart, MessageCircle, UserPlus, Ghost, CheckCheck, Bell, Sparkles, AtSign, Check, X } from "lucide-react";
+import { MOCK_NOTIFICATIONS } from "@/shared/services/mockData";
 import { NotificationItem } from "@/types";
 import { Avatar } from "@/shared/components/ui/Avatar";
 import { Button } from "@/shared/components/ui/Button";

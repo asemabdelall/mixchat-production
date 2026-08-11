@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import { Sparkles, TrendingUp, Eye, Users, Heart, MapPin, ArrowUpRight, BarChart3, Award, ArrowLeft } from "lucide-react";
 import { Card } from "@/shared/components/ui/Card";
-import { Button } from "@/shared/components/ui/Button";
 
 export default function PlusAnalyticsPage() {
   return (

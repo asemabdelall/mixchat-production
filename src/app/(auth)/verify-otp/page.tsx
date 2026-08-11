@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ShieldCheck, RefreshCw } from "lucide-react";
 import { Card } from "@/shared/components/ui/Card";
 import { Button } from "@/shared/components/ui/Button";
 
@@ -11,7 +11,22 @@ export default function VerifyOtpPage() {
   const router = useRouter();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(60);
+  const canResend = resendTimer === 0;
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setInterval(() => setResendTimer((prev) => prev - 1), 1000);
+      return () => clearInterval(timer);
+    }
+  }, [resendTimer]);
+
+  const handleResend = () => {
+    setResendTimer(60);
+    setOtp(["", "", "", "", "", ""]);
+    inputRefs.current[0]?.focus();
+  };
 
   const handleChange = (index: number, value: string) => {
     if (value.length > 1) value = value[value.length - 1];
@@ -74,17 +89,30 @@ export default function VerifyOtpPage() {
         </div>
 
         <div className="text-xs text-muted-foreground flex items-center justify-center gap-2">
-          <span>Resend code in <strong className="text-purple-400">00:45</strong></span>
+          {canResend ? (
+            <button
+              type="button"
+              onClick={handleResend}
+              className="text-purple-300 hover:underline font-bold flex items-center gap-1 cursor-pointer"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span>Resend Verification Code</span>
+            </button>
+          ) : (
+            <span>
+              Resend code in <strong className="text-purple-400">00:{resendTimer.toString().padStart(2, "0")}</strong>
+            </span>
+          )}
         </div>
 
         <Button
           type="submit"
           isLoading={isLoading}
-          disabled={otp.some((d) => !d)}
+          disabled={otp.some((d) => !d) || isLoading}
           className="w-full h-12 text-base font-semibold shadow-lg shadow-purple-500/30"
         >
           <CheckCircle2 className="h-5 w-5" />
-          <span>Verify</span>
+          <span>Verify & Continue</span>
         </Button>
       </form>
     </Card>
