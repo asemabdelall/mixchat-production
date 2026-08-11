@@ -8,6 +8,7 @@ import { CallProvider } from "./CallProvider";
 
 import { LocationProvider } from "./LocationProvider";
 import { ReelsProvider } from "./ReelsProvider";
+import { ServiceWorkerRegister } from "../components/pwa/ServiceWorkerRegister";
 
 export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [queryClient] = useState(
@@ -28,7 +29,10 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
         <LocationProvider>
           <ChatProvider>
             <CallProvider>
-              <ReelsProvider>{children}</ReelsProvider>
+              <ReelsProvider>
+                <ServiceWorkerRegister />
+                {children}
+              </ReelsProvider>
             </CallProvider>
           </ChatProvider>
         </LocationProvider>
