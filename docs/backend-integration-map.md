@@ -61,7 +61,7 @@
   - `GET /api/v1/users/:id/following` -> Paginated list of following users.
   - `POST /api/v1/relationships/follow` -> Follow target user.
   - `DELETE /api/v1/relationships/unfollow` -> Unfollow target user.
-  - `POST /api/v1/relationships/block` -> Block user and purge direct chat threads.
+  - `POST /api/v1/relationships/block` -> Block user to prevent future interactions per privacy policy. (Message history deletion is handled as a separate explicit action).
 - **Realtime**: Push WebSocket event `relationship:updated` for friend request accepts.
 
 ---
