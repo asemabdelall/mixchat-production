@@ -197,9 +197,9 @@ export const DirectDetailsModal: React.FC<DirectDetailsModalProps> = ({
                 <div className="space-y-1.5">
                   {linkMsgs.map((m) => (
                     <div key={m.id} className="p-2 rounded-xl glass-card text-xs truncate border border-white/5">
-                      <a href="#" className="text-purple-300 hover:underline truncate block">
+                      <span className="text-purple-300 truncate block select-all">
                         {m.text}
-                      </a>
+                      </span>
                     </div>
                   ))}
                 </div>

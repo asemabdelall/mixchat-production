@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Sparkles, Check, Crown } from "lucide-react";
 import { MOCK_PREMIUM_PLANS } from "@/shared/services/mockData";
 import { PremiumPlan } from "@/types";
@@ -58,10 +59,10 @@ export default function PremiumPage() {
 
         {/* Analytics Teaser Link */}
         <div className="pt-3">
-          <a href="/premium/analytics" className="inline-flex items-center gap-1.5 text-xs text-purple-300 hover:text-white font-bold underline">
+          <Link href="/premium/analytics" className="inline-flex items-center gap-1.5 text-xs text-purple-300 hover:text-white font-bold underline">
             <Sparkles className="h-3.5 w-3.5" />
             <span>View Plus Analytics Preview</span>
-          </a>
+          </Link>
         </div>
       </div>
 
