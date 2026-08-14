@@ -2,9 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { Rocket, ArrowRight, ShieldCheck, Lock, UserCheck, Heart, MapPin, Sparkles } from "lucide-react";
+import { Rocket, ArrowRight, ShieldCheck, Lock, UserCheck, Heart, MapPin } from "lucide-react";
 
 export default function SplashPage() {
   return (
