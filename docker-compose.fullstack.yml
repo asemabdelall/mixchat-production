@@ -1,0 +1,116 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: mixchat-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mixchat}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mixchat_dev_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-mixchat_db}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - mixchat_postgres_data:/var/lib/postgresql/data
+    networks:
+      - mixchat-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mixchat} -d ${POSTGRES_DB:-mixchat_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: mixchat-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    volumes:
+      - mixchat_redis_data:/data
+    networks:
+      - mixchat-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./mixchat-backend
+      dockerfile: Dockerfile
+    container_name: mixchat-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-mixchat}:${POSTGRES_PASSWORD:-mixchat_dev_secret}@postgres:5432/${POSTGRES_DB:-mixchat_db}?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-mixchat_super_secure_production_jwt_secret_key_2026_at_least_32_chars_long}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-15m}
+      REFRESH_TOKEN_EXPIRATION: ${REFRESH_TOKEN_EXPIRATION:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-mock-account-id}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-mock-access-key}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-mock-secret-key}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME:-mixchat-media}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL:-http://localhost:4000/media}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-BF2tWwM2n3jQ4xL5yZ6aB7cD8eF9gH0iJ1kL2mN3oP4qR5sT6uV7wX8yZ9aB0c}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-secret-vapid-private-key-mixchat-2026-production}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:support@mixchat.app}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mixchat-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:4000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./mixchat-frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api/v1}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-http://localhost:4000}
+    container_name: mixchat-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api/v1}
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-http://localhost:4000}
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - mixchat-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+networks:
+  mixchat-network:
+    name: mixchat-network
+    driver: bridge
+
+volumes:
+  mixchat_postgres_data:
+    name: mixchat_postgres_data
+  mixchat_redis_data:
+    name: mixchat_redis_data
