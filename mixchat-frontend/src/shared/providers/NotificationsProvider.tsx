@@ -227,7 +227,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         try {
           const prefs = await pushNotificationsService.getPreferences();
           if (mounted) setPreferences(prefs);
-          await pushNotificationsService.syncSubscription();
+          const pushIsActive = await pushNotificationsService.syncSubscription();
+          if (mounted) setIsPushSubscribed(pushIsActive);
         } catch {
           // ignore
         }

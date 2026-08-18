@@ -1,6 +1,6 @@
 /* Mix Chat PWA Service Worker - Production Safe & Privacy Preserving */
 
-const CACHE_VERSION = "v5";
+const CACHE_VERSION = "v6";
 const CACHE_NAME = `mixchat-static-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline";
 

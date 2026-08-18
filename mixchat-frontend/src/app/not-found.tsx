@@ -9,7 +9,7 @@ import { Button } from "@/shared/components/ui/Button";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background text-foreground selection:bg-purple-500 selection:text-white">
+    <div className="min-h-app-viewport flex items-center justify-center p-4 bg-background text-foreground selection:bg-purple-500 selection:text-white">
       <Card className="max-w-md w-full glass-panel p-8 shadow-2xl border-white/10 text-center space-y-6">
         <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
           <div className="absolute inset-0 rounded-3xl bg-purple-600/20 blur-xl animate-pulse" />

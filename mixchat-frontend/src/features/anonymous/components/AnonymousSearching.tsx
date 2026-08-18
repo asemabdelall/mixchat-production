@@ -33,7 +33,7 @@ export const AnonymousSearching: React.FC<AnonymousSearchingProps> = ({
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] max-w-xl mx-auto px-4 py-8 text-center select-none">
+    <div className="relative flex flex-col items-center justify-center min-h-[calc(var(--app-viewport-height)-5rem)] max-w-xl mx-auto px-4 py-8 text-center select-none">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-600/20 blur-[100px] rounded-full pointer-events-none" />
 

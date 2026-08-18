@@ -206,7 +206,7 @@ export const AnonymousChatRoom: React.FC<AnonymousChatRoomProps> = ({
     session.status === "ENDED" || partnerConnectionStatus === "DISCONNECTED";
 
   return (
-    <div className="relative flex flex-col h-[calc(100vh-4.5rem)] max-w-4xl mx-auto w-full bg-zinc-950/80 backdrop-blur-xl border-x border-zinc-800/80 shadow-2xl overflow-hidden">
+    <div className="relative flex flex-col h-[calc(var(--app-viewport-height)-4.5rem)] max-w-4xl mx-auto w-full bg-zinc-950/80 backdrop-blur-xl border-x border-zinc-800/80 shadow-2xl overflow-hidden">
       {/* 1. Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-zinc-900/90 backdrop-blur-xl border-b border-zinc-800">
         {/* Partner Persona Info */}

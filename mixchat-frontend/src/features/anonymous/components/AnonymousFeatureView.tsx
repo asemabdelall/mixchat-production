@@ -36,7 +36,7 @@ export const AnonymousFeatureView: React.FC = () => {
   } = useAnonymousChat();
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] w-full flex flex-col justify-center">
+    <div className="relative min-h-[calc(var(--app-viewport-height)-4rem)] w-full flex flex-col justify-center">
       {/* Error Toast / Alert */}
       {error && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-red-950/90 border border-red-500/50 text-red-200 text-xs font-semibold shadow-2xl backdrop-blur-md">

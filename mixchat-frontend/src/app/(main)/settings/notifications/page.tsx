@@ -18,7 +18,6 @@ import {
 import { Card } from "@/shared/components/ui/Card";
 import { Button } from "@/shared/components/ui/Button";
 import { useNotifications } from "@/shared/providers/NotificationsProvider";
-import { pushNotificationsService } from "@/services/notifications/pushNotificationsService";
 import { PwaInstallPrompt } from "@/shared/components/pwa/PwaInstallPrompt";
 import { Switch } from "@/shared/components/ui/Switch";
 
@@ -30,6 +29,7 @@ export default function NotificationSettingsPage() {
     preferences,
     enablePush,
     disablePush,
+    sendTestPush,
     updatePreferences,
   } = useNotifications();
 
@@ -45,8 +45,12 @@ export default function NotificationSettingsPage() {
   const handleSendTestPush = async () => {
     setIsTesting(true);
     try {
-      await pushNotificationsService.sendTestPush();
-      showToast("Test notification sent to device ✓");
+      const success = await sendTestPush();
+      showToast(
+        success
+          ? "Test notification delivered to device ✓"
+          : "No active device received the test notification",
+      );
     } catch {
       showToast("Failed to send test push notification");
     } finally {
