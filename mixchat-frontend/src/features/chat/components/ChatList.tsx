@@ -65,7 +65,7 @@ export const ChatList: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-[#090c15] border-r border-white/10 select-none">
       {/* Top Header */}
-      <div className="p-4 border-b border-white/10 flex items-center justify-between">
+      <div className="px-4 pb-3.5 pt-[max(1rem,calc(env(safe-area-inset-top,0px)+0.75rem))] border-b border-white/10 flex items-center justify-between bg-[#090c15]">
         <div className="flex items-center gap-2">
           <h2 className="text-xl font-bold text-white tracking-tight">
             Messages

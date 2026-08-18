@@ -44,7 +44,7 @@ export const ChatRoomHeader: React.FC<ChatRoomHeaderProps> = ({
   };
 
   return (
-    <div className="shrink-0 p-3 sm:p-3.5 pt-[max(0.75rem,env(safe-area-inset-top))] border-b border-white/10 flex items-center justify-between bg-[#070913]/95 backdrop-blur-xl z-20">
+    <div className="shrink-0 px-3 sm:px-3.5 pb-2.5 sm:pb-3 pt-[max(0.875rem,calc(env(safe-area-inset-top,0px)+0.5rem))] border-b border-white/10 flex items-center justify-between bg-[#070913]/95 backdrop-blur-xl z-20">
       <div className="flex items-center gap-2.5 sm:gap-3">
         {/* Mobile Back Button */}
         <button

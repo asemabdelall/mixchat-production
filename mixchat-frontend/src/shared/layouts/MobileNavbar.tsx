@@ -20,7 +20,7 @@ export const MobileNavbar: React.FC = () => {
 
   return (
     <>
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090c15]/70 backdrop-blur-md border-t border-white/10 px-3 pt-2 pb-[max(0.625rem,env(safe-area-inset-bottom))] shadow-lg">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090c15]/90 backdrop-blur-xl border-t border-white/10 px-3 pt-2 pb-[max(0.75rem,calc(env(safe-area-inset-bottom,0px)+0.25rem))] shadow-lg">
         <nav
           aria-label="Mobile Main Navigation"
           className="flex items-center justify-around max-w-lg mx-auto relative select-none"
