@@ -138,7 +138,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
       {/* Main Composer Input Form */}
       <form
         onSubmit={onSend}
-        className="p-2.5 sm:p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-end gap-2 max-w-5xl mx-auto"
+        className="p-2.5 sm:p-3 pb-safe-chat-input flex items-end gap-2 max-w-5xl mx-auto"
       >
         {/* Emoji Button */}
         <button

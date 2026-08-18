@@ -89,7 +89,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const login = async (data: LoginDto): Promise<UserDto> => {
-    setStatus("loading");
     try {
       const loggedUser = await authService.login(data);
       setUser(loggedUser);
@@ -103,7 +102,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const register = async (data: RegisterDto): Promise<UserDto> => {
-    setStatus("loading");
     try {
       const registeredUser = await authService.register(data);
       setUser(registeredUser);

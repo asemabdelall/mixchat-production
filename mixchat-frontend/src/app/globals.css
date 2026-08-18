@@ -58,6 +58,44 @@
   --app-viewport-height: 100vh;
 }
 
+/* Safe Area Layout Helpers */
+.pt-safe-compact {
+  padding-top: var(--sat);
+}
+.pt-safe-header {
+  padding-top: max(0.75rem, calc(var(--sat) + 0.5rem));
+}
+.pt-safe-room {
+  padding-top: max(0.875rem, calc(var(--sat) + 0.5rem));
+}
+.pt-safe-chat-list {
+  padding-top: max(1rem, calc(var(--sat) + 0.75rem));
+}
+.pt-safe-reels {
+  padding-top: max(0.75rem, var(--sat));
+}
+.pt-safe-main {
+  padding-top: calc(4.25rem + var(--sat));
+}
+.pb-safe-navbar {
+  padding-bottom: max(0.25rem, var(--sab));
+}
+.pb-safe-chat-input {
+  padding-bottom: max(0.75rem, var(--sab));
+}
+.pb-safe-main {
+  padding-bottom: calc(3.75rem + var(--sab));
+}
+.bottom-safe-map-card {
+  bottom: calc(4.5rem + var(--sab));
+}
+.bottom-safe-reel-actions {
+  bottom: calc(2.5rem + var(--sab));
+}
+.bottom-safe-reel-caption {
+  bottom: calc(1.5rem + var(--sab));
+}
+
 html {
   width: 100%;
   height: 100%;
