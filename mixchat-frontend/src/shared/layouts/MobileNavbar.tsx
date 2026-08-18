@@ -20,7 +20,7 @@ export const MobileNavbar: React.FC = () => {
 
   return (
     <>
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090c15]/90 backdrop-blur-xl border-t border-white/10 px-3 pt-2 pb-[max(0.75rem,calc(env(safe-area-inset-bottom,0px)+0.25rem))] shadow-lg">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090c15]/95 backdrop-blur-xl border-t border-white/10 px-3 pt-1.5 pb-[max(0.25rem,env(safe-area-inset-bottom,0px))] shadow-lg">
         <nav
           aria-label="Mobile Main Navigation"
           className="flex items-center justify-around max-w-lg mx-auto relative select-none"
@@ -30,7 +30,7 @@ export const MobileNavbar: React.FC = () => {
             href="/feed"
             aria-current={pathname === "/feed" ? "page" : undefined}
             className={cn(
-              "flex flex-col items-center justify-center min-w-[56px] py-1 rounded-xl transition-all active:scale-95 cursor-pointer select-none",
+              "flex flex-col items-center justify-center min-w-[50px] py-0.5 rounded-xl transition-all active:scale-95 cursor-pointer select-none",
               pathname === "/feed"
                 ? "text-purple-400 font-bold"
                 : "text-muted-foreground hover:text-foreground",
