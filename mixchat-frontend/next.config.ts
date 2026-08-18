@@ -45,7 +45,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  ...(process.env.BUILD_STANDALONE === "true" ? { output: "standalone" } : {}),
   poweredByHeader: false,
   compress: true,
   productionBrowserSourceMaps: false,
