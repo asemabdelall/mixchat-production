@@ -19,6 +19,7 @@ interface AuthResponseBody {
     status: string;
   };
   accessToken: string;
+  refreshToken?: string;
 }
 
 interface GenericSuccessBody {
@@ -167,6 +168,34 @@ describe('Auth & Session Lifecycle (e2e)', () => {
     await request(app.getHttpServer())
       .post('/api/v1/auth/refresh')
       .set('Cookie', [refreshCookie])
+      .expect(401);
+  });
+
+  it('should restore and revoke a cross-origin session using the JSON refresh token fallback', async () => {
+    const login = await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .send({ identifier: testUser.email, password: testUser.password })
+      .expect(200);
+    const loginBody = login.body as AuthResponseBody;
+    expect(loginBody.refreshToken).toBeDefined();
+
+    const refreshed = await request(app.getHttpServer())
+      .post('/api/v1/auth/refresh')
+      .send({ refreshToken: loginBody.refreshToken })
+      .expect(200);
+    const refreshedBody = refreshed.body as AuthResponseBody;
+    expect(refreshedBody.accessToken).toBeDefined();
+    expect(refreshedBody.refreshToken).toBeDefined();
+    expect(refreshedBody.refreshToken).not.toBe(loginBody.refreshToken);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/auth/logout')
+      .send({ refreshToken: refreshedBody.refreshToken })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/auth/refresh')
+      .send({ refreshToken: refreshedBody.refreshToken })
       .expect(401);
   });
 

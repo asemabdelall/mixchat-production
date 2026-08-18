@@ -115,7 +115,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Rotate refresh token via HttpOnly cookie and issue new access token */
+        /** Rotate refresh token via HttpOnly cookie or header and issue new access token */
         post: operations["AuthController_refresh_v1"];
         delete?: never;
         options?: never;
@@ -2095,6 +2095,11 @@ export interface components {
             user: components["schemas"]["UserDto"];
             /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
             accessToken: string;
+            /**
+             * @description Rotating refresh token for cross-origin and mobile PWA fallback storage
+             * @example d8e4f1a2...
+             */
+            refreshToken?: string;
         };
         LoginDto: {
             /**
