@@ -92,14 +92,18 @@ export default (): AppConfig => ({
   cookie: {
     domain: process.env.COOKIE_DOMAIN || undefined,
     sameSite:
-      (process.env.COOKIE_SAME_SITE as 'lax' | 'strict' | 'none') || 'lax',
+      (process.env.COOKIE_SAME_SITE as 'lax' | 'strict' | 'none') ||
+      (process.env.NODE_ENV === 'production' ? 'none' : 'lax'),
     secure:
       process.env.COOKIE_SECURE !== undefined
         ? process.env.COOKIE_SECURE === 'true'
         : process.env.NODE_ENV === 'production',
   },
   http: {
-    trustProxy: process.env.TRUST_PROXY === 'true',
+    trustProxy:
+      process.env.TRUST_PROXY !== undefined
+        ? process.env.TRUST_PROXY === 'true'
+        : process.env.NODE_ENV === 'production',
     bodyLimitKb: parseInt(process.env.BODY_LIMIT_KB || '256', 10),
   },
   storage: {

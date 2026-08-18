@@ -42,10 +42,13 @@ export class AuthController {
   ) {}
 
   private setRefreshCookie(res: Response, token: string) {
-    const secure = this.configService.get<boolean>('cookie.secure') ?? false;
+    const isProduction =
+      this.configService.get<string>('nodeEnv') === 'production';
+    const secure =
+      this.configService.get<boolean>('cookie.secure') ?? isProduction;
     const sameSite =
       this.configService.get<'lax' | 'strict' | 'none'>('cookie.sameSite') ??
-      'lax';
+      (isProduction ? 'none' : 'lax');
     const domain = this.configService.get<string>('cookie.domain');
     const days =
       this.configService.get<number>('jwt.refreshExpirationDays') ?? 7;
@@ -55,16 +58,19 @@ export class AuthController {
       secure,
       sameSite,
       domain: domain || undefined,
-      path: '/api',
+      path: '/',
       maxAge: days * 24 * 60 * 60 * 1000,
     });
   }
 
   private clearRefreshCookie(res: Response) {
-    const secure = this.configService.get<boolean>('cookie.secure') ?? false;
+    const isProduction =
+      this.configService.get<string>('nodeEnv') === 'production';
+    const secure =
+      this.configService.get<boolean>('cookie.secure') ?? isProduction;
     const sameSite =
       this.configService.get<'lax' | 'strict' | 'none'>('cookie.sameSite') ??
-      'lax';
+      (isProduction ? 'none' : 'lax');
     const domain = this.configService.get<string>('cookie.domain');
 
     res.clearCookie('mixchat_refresh_token', {
@@ -72,7 +78,7 @@ export class AuthController {
       secure,
       sameSite,
       domain: domain || undefined,
-      path: '/api',
+      path: '/',
     });
   }
 
