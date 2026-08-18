@@ -19,6 +19,51 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return outputArray;
 }
 
+function subscriptionUsesKey(
+  subscription: PushSubscription,
+  expectedKey: Uint8Array,
+): boolean {
+  const currentKey = subscription.options.applicationServerKey;
+
+  // Older browser implementations may not expose the key. In that case the
+  // subscription is still re-registered server-side without destructive churn.
+  if (!currentKey) return true;
+
+  const currentBytes = new Uint8Array(currentKey);
+  if (currentBytes.length !== expectedKey.length) return false;
+
+  return currentBytes.every((byte, index) => byte === expectedKey[index]);
+}
+
+async function getReadyServiceWorker(): Promise<ServiceWorkerRegistration> {
+  const existing = await navigator.serviceWorker.getRegistration("/");
+  const registration =
+    existing ||
+    (await navigator.serviceWorker.register("/sw.js", { scope: "/" }));
+
+  if (registration.active) return registration;
+
+  return navigator.serviceWorker.ready;
+}
+
+async function registerSubscription(
+  subscription: PushSubscription,
+): Promise<void> {
+  const subJson = subscription.toJSON();
+  if (!subJson.endpoint || !subJson.keys?.p256dh || !subJson.keys?.auth) {
+    throw new Error("Invalid push subscription structure returned by browser");
+  }
+
+  await apiClient.post("/push/subscriptions", {
+    endpoint: subJson.endpoint,
+    keys: {
+      p256dh: subJson.keys.p256dh,
+      auth: subJson.keys.auth,
+    },
+    userAgent: navigator.userAgent,
+  });
+}
+
 export const pushNotificationsService = {
   /**
    * Check if Push API and Service Workers are supported in the current browser
@@ -42,21 +87,12 @@ export const pushNotificationsService = {
     return Notification.permission;
   },
 
-  /**
-   * Get VAPID public key from environment or backend
-   */
+  /** Get the canonical VAPID public key from the signing backend. */
   async getVapidPublicKey(): Promise<string> {
-    const envKey = process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY;
-    if (envKey) return envKey;
-
-    try {
-      const res = await apiClient.get<{ publicKey: string }>(
-        "/push/vapid-public-key",
-      );
-      return res.publicKey;
-    } catch {
-      return "";
-    }
+    const res = await apiClient.get<{ publicKey: string }>(
+      "/push/vapid-public-key",
+    );
+    return res.publicKey;
   },
 
   /**
@@ -65,7 +101,8 @@ export const pushNotificationsService = {
   async getExistingSubscription(): Promise<PushSubscription | null> {
     if (!this.isPushSupported()) return null;
     try {
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await navigator.serviceWorker.getRegistration("/");
+      if (!reg) return null;
       return await reg.pushManager.getSubscription();
     } catch {
       return null;
@@ -97,7 +134,7 @@ export const pushNotificationsService = {
       const convertedVapidKey = urlBase64ToUint8Array(publicKey);
       const applicationServerKey = new Uint8Array(convertedVapidKey.length);
       applicationServerKey.set(convertedVapidKey);
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await getReadyServiceWorker();
 
       let subscription = await reg.pushManager.getSubscription();
       if (subscription) {
@@ -113,22 +150,7 @@ export const pushNotificationsService = {
         applicationServerKey,
       });
 
-      const subJson = subscription.toJSON();
-      if (!subJson.endpoint || !subJson.keys?.p256dh || !subJson.keys?.auth) {
-        throw new Error(
-          "Invalid push subscription structure returned by browser",
-        );
-      }
-
-      await apiClient.post("/push/subscriptions", {
-        endpoint: subJson.endpoint,
-        keys: {
-          p256dh: subJson.keys.p256dh,
-          auth: subJson.keys.auth,
-        },
-        userAgent:
-          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-      });
+      await registerSubscription(subscription);
 
       return { success: true, permission: "granted" };
     } catch {
@@ -152,7 +174,8 @@ export const pushNotificationsService = {
     if (!this.isPushSupported()) return true;
 
     try {
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await navigator.serviceWorker.getRegistration("/");
+      if (!reg) return true;
       const subscription = await reg.pushManager.getSubscription();
 
       if (subscription) {
@@ -177,29 +200,40 @@ export const pushNotificationsService = {
   /**
    * Reconcile/sync existing browser subscription with authenticated session
    */
-  async syncSubscription(): Promise<void> {
+  async syncSubscription(): Promise<boolean> {
     if (!this.isPushSupported() || this.getPermissionState() !== "granted") {
-      return;
+      return false;
     }
 
     try {
-      const sub = await this.getExistingSubscription();
-      if (!sub) return;
+      const publicKey = await this.getVapidPublicKey();
+      if (!publicKey) return false;
 
-      const subJson = sub.toJSON();
-      if (subJson.endpoint && subJson.keys?.p256dh && subJson.keys?.auth) {
-        await apiClient.post("/push/subscriptions", {
-          endpoint: subJson.endpoint,
-          keys: {
-            p256dh: subJson.keys.p256dh,
-            auth: subJson.keys.auth,
-          },
-          userAgent:
-            typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      const expectedKey = urlBase64ToUint8Array(publicKey);
+      const registration = await getReadyServiceWorker();
+      let subscription = await registration.pushManager.getSubscription();
+
+      // Production origins persist subscriptions across deployments. Recreate
+      // one that was issued for a previous VAPID key after key rotation.
+      if (subscription && !subscriptionUsesKey(subscription, expectedKey)) {
+        await subscription.unsubscribe();
+        subscription = null;
+      }
+
+      if (!subscription) {
+        const applicationServerKey = new Uint8Array(expectedKey.length);
+        applicationServerKey.set(expectedKey);
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey,
         });
       }
+
+      await registerSubscription(subscription);
+      return true;
     } catch {
       // Startup reconciliation is best effort and retried on the next session.
+      return false;
     }
   },
 
