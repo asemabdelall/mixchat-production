@@ -70,7 +70,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
 
       {/* Main Content Viewport Area */}
       <div
-        className="flex flex-col h-full w-full overflow-hidden relative lg:pl-64"
+        className="flex-1 min-h-0 flex flex-col w-full overflow-hidden relative lg:pl-64"
       >
         {/* Global Fixed Header */}
         {showGlobalHeader && (
@@ -83,7 +83,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
 
         {/* Dynamic Scrollable Viewport Container (Isolated Native Scroll) */}
         <main
-          className={`flex-1 w-full h-full overflow-y-auto overflow-x-hidden overscroll-y-contain select-auto ${
+          className={`flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden overscroll-y-contain select-auto ${
             isImmersiveRoute
               ? "p-0 flex flex-col overflow-hidden"
               : isChatRoute
@@ -108,10 +108,10 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
             {children}
           </PageTransition>
         </main>
-
-        {/* Floating Mobile Bottom Navigation Bar (fixed bottom) */}
-        {showMobileNavbar && <MobileNavbar />}
       </div>
+
+      {/* Floating Mobile Bottom Navigation Bar (anchored directly to viewport root) */}
+      {showMobileNavbar && <MobileNavbar />}
     </div>
   );
 };
