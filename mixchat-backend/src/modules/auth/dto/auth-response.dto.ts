@@ -93,6 +93,13 @@ export class AuthResponseDto {
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
   accessToken!: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    example: 'd8e4f1a2...',
+    description: 'Rotating refresh token for cross-origin and mobile PWA fallback storage',
+  })
+  refreshToken?: string;
 }
 
 export class SessionResponseDto {

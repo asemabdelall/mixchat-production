@@ -12,10 +12,17 @@ export const authService = {
    * Register a new user and store access token in memory
    */
   async register(data: RegisterDto): Promise<UserDto> {
-    const res = await apiClient.post<AuthResponseDto>("/auth/register", data, {
-      skipAuthRefresh: true,
-    });
+    const res = await apiClient.post<AuthResponseDto & { refreshToken?: string }>(
+      "/auth/register",
+      data,
+      {
+        skipAuthRefresh: true,
+      },
+    );
     apiClient.setAccessToken(res.accessToken);
+    if (res.refreshToken) {
+      apiClient.setRefreshToken(res.refreshToken);
+    }
     return res.user;
   },
 
@@ -23,15 +30,22 @@ export const authService = {
    * Login with email or username and store access token in memory
    */
   async login(data: LoginDto): Promise<UserDto> {
-    const res = await apiClient.post<AuthResponseDto>("/auth/login", data, {
-      skipAuthRefresh: true,
-    });
+    const res = await apiClient.post<AuthResponseDto & { refreshToken?: string }>(
+      "/auth/login",
+      data,
+      {
+        skipAuthRefresh: true,
+      },
+    );
     apiClient.setAccessToken(res.accessToken);
+    if (res.refreshToken) {
+      apiClient.setRefreshToken(res.refreshToken);
+    }
     return res.user;
   },
 
   /**
-   * Refresh session using HttpOnly cookie and restore access token in memory
+   * Refresh session using HttpOnly cookie or persistent token and restore access token in memory
    * Uses single-flight refresh mutex to prevent duplicate concurrent refresh requests
    */
   async refresh(): Promise<UserDto> {
@@ -50,6 +64,7 @@ export const authService = {
       await apiClient.post("/auth/logout", {}, { skipAuthRefresh: true });
     } finally {
       apiClient.setAccessToken(null);
+      apiClient.setRefreshToken(null);
     }
   },
 
@@ -61,6 +76,7 @@ export const authService = {
       await apiClient.post("/auth/logout-all", {});
     } finally {
       apiClient.setAccessToken(null);
+      apiClient.setRefreshToken(null);
     }
   },
 

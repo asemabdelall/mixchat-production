@@ -50,6 +50,37 @@ class ApiClient {
     return this.accessToken;
   }
 
+  /**
+   * Set persistent refresh token (cross-origin and mobile PWA fallback)
+   */
+  public setRefreshToken(token: string | null) {
+    if (typeof window !== "undefined") {
+      try {
+        if (token) {
+          localStorage.setItem("mixchat_refresh_token", token);
+        } else {
+          localStorage.removeItem("mixchat_refresh_token");
+        }
+      } catch {
+        // Ignore localStorage quota/sandbox errors
+      }
+    }
+  }
+
+  /**
+   * Get persistent refresh token
+   */
+  public getRefreshToken(): string | null {
+    if (typeof window !== "undefined") {
+      try {
+        return localStorage.getItem("mixchat_refresh_token");
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+
   private buildUrl(
     endpoint: string,
     params?: Record<string, string | number | boolean | undefined>,
@@ -78,18 +109,24 @@ class ApiClient {
 
     this.refreshPromise = (async () => {
       try {
+        const storedRefreshToken = this.getRefreshToken();
         const refreshUrl = `${this.baseUrl}/auth/refresh`;
         const res = await fetch(refreshUrl, {
           method: "POST",
           headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
+            ...(storedRefreshToken ? { "x-refresh-token": storedRefreshToken } : {}),
           },
+          body: JSON.stringify({
+            refreshToken: storedRefreshToken || undefined,
+          }),
           credentials: "include",
         });
 
         if (!res.ok) {
           this.setAccessToken(null);
+          this.setRefreshToken(null);
           this.lastUserData = null;
           if (typeof window !== "undefined") {
             window.dispatchEvent(new CustomEvent("mixchat:unauthorized"));
@@ -99,14 +136,19 @@ class ApiClient {
 
         const data = (await res.json()) as {
           accessToken?: string;
+          refreshToken?: string;
           user?: unknown;
         };
         const newAccessToken = data.accessToken || null;
         this.setAccessToken(newAccessToken);
+        if (data.refreshToken) {
+          this.setRefreshToken(data.refreshToken);
+        }
         this.lastUserData = data.user || null;
         return newAccessToken;
       } catch {
         this.setAccessToken(null);
+        this.setRefreshToken(null);
         this.lastUserData = null;
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("mixchat:unauthorized"));

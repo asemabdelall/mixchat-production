@@ -102,6 +102,7 @@ export class AuthController {
     return {
       user: result.user,
       accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
     };
   }
 
@@ -126,6 +127,7 @@ export class AuthController {
     return {
       user: result.user,
       accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
     };
   }
 
@@ -136,7 +138,7 @@ export class AuthController {
   @ApiCookieAuth('mixchat_refresh_token')
   @ApiOperation({
     summary:
-      'Rotate refresh token via HttpOnly cookie and issue new access token',
+      'Rotate refresh token via HttpOnly cookie or header and issue new access token',
   })
   @ApiResponse({ status: 200, type: AuthResponseDto })
   @ApiResponse({
@@ -148,7 +150,10 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponseDto> {
     const rawRefreshToken =
-      (req.cookies?.['mixchat_refresh_token'] as string) || '';
+      (req.cookies?.['mixchat_refresh_token'] as string) ||
+      (req.headers['x-refresh-token'] as string) ||
+      (req.body?.refreshToken as string) ||
+      '';
     const ip = req.ip || (req.headers['x-forwarded-for'] as string);
     const userAgent = req.headers['user-agent'];
 
@@ -163,6 +168,7 @@ export class AuthController {
       return {
         user: result.user,
         accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
       };
     } catch (error) {
       this.clearRefreshCookie(res);
@@ -181,7 +187,10 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ success: boolean; message: string }> {
     const rawRefreshToken =
-      (req.cookies?.['mixchat_refresh_token'] as string) || '';
+      (req.cookies?.['mixchat_refresh_token'] as string) ||
+      (req.headers['x-refresh-token'] as string) ||
+      (req.body?.refreshToken as string) ||
+      '';
     const ip = req.ip || (req.headers['x-forwarded-for'] as string);
 
     await this.authService.logout(rawRefreshToken, undefined, ip);
