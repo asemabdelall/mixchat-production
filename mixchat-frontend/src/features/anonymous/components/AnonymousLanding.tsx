@@ -75,7 +75,7 @@ export const AnonymousLanding: React.FC<AnonymousLandingProps> = ({
   const totalSelected = selectedTopics.length + customTopics.length;
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] max-w-4xl mx-auto px-4 py-8 text-center select-none">
+    <div className="relative flex flex-col items-center justify-center min-h-[calc(var(--app-viewport-height)-5rem)] max-w-4xl mx-auto px-4 py-8 text-center select-none">
       {/* Ambient background glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-600/15 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-cyan-600/10 blur-[100px] rounded-full pointer-events-none" />
