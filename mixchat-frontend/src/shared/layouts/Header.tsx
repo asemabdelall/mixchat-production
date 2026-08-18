@@ -29,7 +29,7 @@ export const Header: React.FC = () => {
   const avatarUrl = user?.avatarUrl || "/mixchat-icon.png";
 
   return (
-    <header className="w-full bg-[#090c15]/90 backdrop-blur-xl border-b border-white/10 px-3 sm:px-4 lg:px-8 pb-2.5 sm:pb-3 pt-[max(0.75rem,calc(env(safe-area-inset-top,0px)+0.5rem))] transition-all shadow-sm">
+    <header className="w-full bg-[#090c15]/90 backdrop-blur-xl border-b border-white/10 px-3 sm:px-4 lg:px-8 pb-2.5 sm:pb-3 pt-safe-header transition-all shadow-sm">
       <div className="flex items-center justify-between gap-2.5 sm:gap-4 max-w-7xl mx-auto">
         {/* Mobile & Tablet Logo (Hidden on Desktop since DesktopSidebar already displays brand logo) */}
         <Link

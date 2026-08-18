@@ -258,16 +258,31 @@ class ApiClient {
       }
 
       if (!response.ok) {
-        const errorPayload = data as { error?: Record<string, unknown> } | null;
+        const errorPayload = data as {
+          error?: Record<string, unknown>;
+          message?: string | string[];
+          statusCode?: number;
+        } | null;
+
+        let errMsg = "Request failed";
+        if (typeof errorPayload?.error?.message === "string" && errorPayload.error.message.trim()) {
+          errMsg = errorPayload.error.message;
+        } else if (typeof errorPayload?.message === "string" && errorPayload.message.trim()) {
+          errMsg = errorPayload.message;
+        } else if (Array.isArray(errorPayload?.message) && errorPayload.message.length > 0) {
+          errMsg = errorPayload.message.join(", ");
+        } else if (response.status === 401) {
+          errMsg = "Invalid username/email or password.";
+        } else if (response.statusText) {
+          errMsg = response.statusText;
+        }
+
         const normalizedError: ApiClientError = {
           code:
             (errorPayload?.error?.code as string) || `HTTP_${response.status}`,
-          message:
-            (errorPayload?.error?.message as string) ||
-            response.statusText ||
-            "Request failed",
+          message: errMsg,
           statusCode: response.status,
-          details: errorPayload?.error?.details,
+          details: errorPayload?.error?.details || errorPayload?.message,
           requestId:
             (errorPayload?.error?.requestId as string) || responseRequestId,
           timestamp:

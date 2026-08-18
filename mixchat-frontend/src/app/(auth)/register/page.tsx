@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -11,12 +11,13 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
-  ShieldCheck,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { AuthBrand } from "@/shared/components/auth/AuthBrand";
+import { AuthTabSwitcher } from "@/shared/components/auth/AuthTabSwitcher";
 import { useAuth } from "@/shared/providers/AuthProvider";
 import { ApiClientError } from "@/services/api/apiClient";
 
@@ -29,6 +30,59 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{
+    username?: string;
+    email?: string;
+    password?: string;
+  }>({});
+
+  // Real-time validation checks
+  const isUsernameValid = useMemo(() => {
+    const clean = username.trim().toLowerCase();
+    return /^[a-zA-Z0-9_]{3,30}$/.test(clean);
+  }, [username]);
+
+  const isEmailValid = useMemo(() => {
+    const clean = email.trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean);
+  }, [email]);
+
+  // Password strength calculation
+  const passwordStrength = useMemo(() => {
+    if (!password) return { score: 0, label: "None", color: "bg-slate-700" };
+    let score = 0;
+    if (password.length >= 8) score += 1;
+    if (/[A-Z]/.test(password) || /[0-9]/.test(password)) score += 1;
+    if (/[^A-Za-z0-9]/.test(password) && password.length >= 10) score += 1;
+
+    if (score === 1) return { score: 1, label: "Weak", color: "bg-rose-500", text: "text-rose-400" };
+    if (score === 2) return { score: 2, label: "Good", color: "bg-amber-500", text: "text-amber-400" };
+    return { score: 3, label: "Strong", color: "bg-emerald-500", text: "text-emerald-400" };
+  }, [password]);
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value);
+    if (errorMessage) setErrorMessage(null);
+    if (fieldErrors.username) {
+      setFieldErrors((prev) => ({ ...prev, username: undefined }));
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (errorMessage) setErrorMessage(null);
+    if (fieldErrors.email) {
+      setFieldErrors((prev) => ({ ...prev, email: undefined }));
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (errorMessage) setErrorMessage(null);
+    if (fieldErrors.password) {
+      setFieldErrors((prev) => ({ ...prev, password: undefined }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,26 +90,28 @@ export default function RegisterPage() {
 
     const cleanUsername = username.trim().toLowerCase();
     const cleanEmail = email.trim().toLowerCase();
+    const newErrors: { username?: string; email?: string; password?: string } = {};
 
     if (!cleanUsername) {
-      setErrorMessage("Please enter a username.");
-      return;
+      newErrors.username = "Please choose a username.";
+    } else if (!/^[a-zA-Z0-9_]{3,30}$/.test(cleanUsername)) {
+      newErrors.username = "Username must be 3-30 characters (letters, numbers, underscores).";
     }
 
-    if (!/^[a-zA-Z0-9_]{3,30}$/.test(cleanUsername)) {
-      setErrorMessage(
-        "Username must be 3-30 characters, letters, numbers, and underscore only.",
-      );
-      return;
+    if (!cleanEmail) {
+      newErrors.email = "Please enter your email address.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      newErrors.email = "Please enter a valid email address.";
     }
 
-    if (!cleanEmail.includes("@") || !cleanEmail.includes(".")) {
-      setErrorMessage("Please enter a valid email address.");
-      return;
+    if (!password) {
+      newErrors.password = "Please create a password.";
+    } else if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters.";
     }
 
-    if (password.length < 8) {
-      setErrorMessage("Password must be at least 8 characters long.");
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
       return;
     }
 
@@ -71,7 +127,7 @@ export default function RegisterPage() {
       const apiErr = err as ApiClientError;
       setErrorMessage(
         apiErr.message ||
-          "Registration failed. Please check your information and try again.",
+          "Registration could not be completed. Please check your information.",
       );
     } finally {
       setIsLoading(false);
@@ -79,132 +135,197 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <div className="w-full">
-        <div className="relative rounded-3xl bg-[#0c0f1d]/85 backdrop-blur-2xl border border-white/[0.09] shadow-[0_20px_50px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(139,92,246,0.12)] p-5 sm:p-6 overflow-hidden">
-          {/* Subtle Corner Ambient Lighting */}
-          <div className="absolute -top-24 -left-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="w-full flex flex-col">
+      {/* Mobile Branding (visible on small screens) */}
+      <div className="lg:hidden">
+        <AuthBrand compact />
+      </div>
 
-          {/* Shared Branding Header */}
-          <AuthBrand />
+      {/* Mode Navigation Tabs */}
+      <AuthTabSwitcher activeTab="register" />
 
-          {/* Greeting & Subtitle */}
-          <div className="text-center mb-4">
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mb-0.5">
-              Create your account
-            </h2>
-            <p className="text-xs text-slate-400">
-              Join MixChat and connect with friends
-            </p>
+      {/* Section Header */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-white tracking-tight">
+          Create an account
+        </h2>
+        <p className="text-xs text-slate-400 mt-1">
+          Join the MixChat community and start connecting today
+        </p>
+      </div>
+
+      {/* Global Error Banner */}
+      {errorMessage && (
+        <div
+          role="alert"
+          className="mb-5 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200"
+        >
+          <AlertCircle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" />
+          <div className="flex-1">
+            <span className="font-semibold block">Registration error</span>
+            <span className="text-rose-300/90 text-[11px]">{errorMessage}</span>
           </div>
+          <button
+            type="button"
+            onClick={() => setErrorMessage(null)}
+            className="text-rose-400 hover:text-white text-xs cursor-pointer px-1"
+            aria-label="Dismiss error"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
-          {errorMessage && (
-            <div
-              role="alert"
-              className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-center gap-2 animate-in fade-in duration-200"
-            >
-              <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
-              <span>{errorMessage}</span>
+      {/* Register Form */}
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        {/* Username field */}
+        <Input
+          id="register-username"
+          label="Username"
+          type="text"
+          name="username"
+          placeholder="e.g. alex_rivera"
+          autoComplete="username"
+          icon={<User className="h-4 w-4" />}
+          rightElement={
+            isUsernameValid ? (
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            ) : null
+          }
+          value={username}
+          onChange={handleUsernameChange}
+          error={fieldErrors.username}
+          helperText="3-30 letters, numbers, and underscores"
+          required
+          disabled={isLoading}
+        />
+
+        {/* Email field */}
+        <Input
+          id="register-email"
+          label="Email Address"
+          type="email"
+          name="email"
+          placeholder="name@example.com"
+          autoComplete="email"
+          icon={<Mail className="h-4 w-4" />}
+          rightElement={
+            isEmailValid ? (
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            ) : null
+          }
+          value={email}
+          onChange={handleEmailChange}
+          error={fieldErrors.email}
+          required
+          disabled={isLoading}
+        />
+
+        {/* Password field */}
+        <div className="space-y-2">
+          <Input
+            id="register-password"
+            label="Password"
+            type={showPassword ? "text" : "password"}
+            name="new-password"
+            placeholder="Create a strong password"
+            autoComplete="new-password"
+            icon={<Lock className="h-4 w-4" />}
+            rightElement={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="flex min-h-8 min-w-8 items-center justify-center text-white/40 hover:text-white transition-colors cursor-pointer"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            }
+            value={password}
+            onChange={handlePasswordChange}
+            error={fieldErrors.password}
+            required
+            disabled={isLoading}
+          />
+
+          {/* Dynamic Password Strength Indicator */}
+          {password.length > 0 && (
+            <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1.5 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-slate-400">Password Strength:</span>
+                <span className={`font-semibold ${passwordStrength.text}`}>
+                  {passwordStrength.label}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 h-1.5">
+                <div
+                  className={`rounded-full transition-all duration-300 ${
+                    passwordStrength.score >= 1 ? passwordStrength.color : "bg-white/10"
+                  }`}
+                />
+                <div
+                  className={`rounded-full transition-all duration-300 ${
+                    passwordStrength.score >= 2 ? passwordStrength.color : "bg-white/10"
+                  }`}
+                />
+                <div
+                  className={`rounded-full transition-all duration-300 ${
+                    passwordStrength.score >= 3 ? passwordStrength.color : "bg-white/10"
+                  }`}
+                />
+              </div>
+              <div className="flex items-center gap-3 text-[10px] text-slate-400 pt-0.5">
+                <span className={`flex items-center gap-1 ${password.length >= 8 ? "text-emerald-400" : ""}`}>
+                  <CheckCircle2 className="w-3 h-3" /> Min. 8 characters
+                </span>
+                <span className={`flex items-center gap-1 ${/[0-9]/.test(password) ? "text-emerald-400" : ""}`}>
+                  <CheckCircle2 className="w-3 h-3" /> Contains number
+                </span>
+              </div>
             </div>
           )}
-
-          {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              id="register-username"
-              label="Username"
-              type="text"
-              name="username"
-              placeholder="your_username"
-              autoComplete="username"
-              icon={<User className="h-4 w-4" />}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-
-            <Input
-              id="register-email"
-              label="Email Address"
-              type="email"
-              name="email"
-              placeholder="name@example.com"
-              autoComplete="email"
-              icon={<Mail className="h-4 w-4" />}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-
-            <Input
-              id="register-password"
-              label="Password (min. 8 characters)"
-              type={showPassword ? "text" : "password"}
-              name="new-password"
-              placeholder="••••••••••••"
-              autoComplete="new-password"
-              icon={<Lock className="h-4 w-4" />}
-              rightElement={
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="flex min-h-8 min-w-8 items-center justify-center text-white/40 hover:text-white transition-colors cursor-pointer"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              }
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-11 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-sm shadow-[0_4px_20px_rgba(139,92,246,0.35)] transition-all flex items-center justify-center gap-2 group mt-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Creating Account...</span>
-                </>
-              ) : (
-                <>
-                  <span>Create Account</span>
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          {/* Footer Security Badge */}
-          <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-center gap-1.5 text-[11px] text-slate-400 select-none">
-            <ShieldCheck className="h-3.5 w-3.5 text-purple-400" />
-            <span>Secure registration with Argon2id password hashing</span>
-          </div>
-
-          {/* Switch to Login */}
-          <div className="text-center mt-3 pt-2">
-            <p className="text-xs text-slate-400">
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="inline-flex min-h-11 items-center text-purple-400 hover:text-purple-300 font-semibold transition-colors"
-              >
-                Sign in
-              </Link>
-            </p>
-          </div>
         </div>
+
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-full h-11 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 bg-[length:200%_auto] hover:bg-right transition-all duration-300 text-white font-semibold rounded-2xl text-sm shadow-[0_4px_20px_rgba(139,92,246,0.35)] flex items-center justify-center gap-2 group mt-3 cursor-pointer"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Creating your account...</span>
+            </>
+          ) : (
+            <>
+              <span>Create Free Account</span>
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </>
+          )}
+        </Button>
+      </form>
+
+      {/* Terms & Privacy Note */}
+      <p className="text-[11px] text-slate-400 text-center mt-3 leading-relaxed">
+        By registering, you agree to MixChat&apos;s Community Guidelines and Privacy Policy.
+      </p>
+
+      {/* Bottom Switch Link */}
+      <div className="text-center mt-4">
+        <p className="text-xs text-slate-400">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="text-purple-400 hover:text-purple-300 font-semibold transition-colors ml-1 inline-flex items-center hover:underline"
+          >
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
   );

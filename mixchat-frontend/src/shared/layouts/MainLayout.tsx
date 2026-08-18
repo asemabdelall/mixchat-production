@@ -89,14 +89,14 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
               : isChatRoute
                 ? "p-0 lg:p-3 flex flex-col overflow-hidden w-full h-full max-w-none"
                 : isFocusedRoute
-                  ? `px-3 sm:px-6 lg:px-8 max-w-5xl mx-auto pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] lg:pb-8 ${
+                  ? `px-3 sm:px-6 lg:px-8 max-w-5xl mx-auto pb-safe-main lg:pb-8 ${
                       showGlobalHeader
-                        ? "pt-[calc(4.25rem+env(safe-area-inset-top,0px))] sm:pt-[calc(4.5rem+env(safe-area-inset-top,0px))] lg:pt-20"
+                        ? "pt-safe-main sm:pt-[calc(4.5rem+var(--sat))] lg:pt-20"
                         : "pt-3 sm:pt-6 lg:pt-8"
                     }`
-                  : `px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] lg:pb-8 ${
+                  : `px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-safe-main lg:pb-8 ${
                       showGlobalHeader
-                        ? "pt-[calc(4.25rem+env(safe-area-inset-top,0px))] sm:pt-[calc(4.5rem+env(safe-area-inset-top,0px))] lg:pt-20"
+                        ? "pt-safe-main sm:pt-[calc(4.5rem+var(--sat))] lg:pt-20"
                         : "pt-3 sm:pt-6 lg:pt-8"
                     }`
           }`}

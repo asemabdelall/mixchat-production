@@ -183,7 +183,7 @@ export const ReelFeedViewer: React.FC = () => {
       )}
 
       {/* Top Floating Category Switcher, Back Button & Create Button */}
-      <div className="absolute top-0 inset-x-0 z-40 flex items-center justify-between px-3.5 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 pointer-events-none">
+      <div className="absolute top-0 inset-x-0 z-40 flex items-center justify-between px-3.5 sm:px-6 pt-safe-reels pb-3 pointer-events-none">
         {/* Back Button to Feed */}
         <Link
           href="/feed"

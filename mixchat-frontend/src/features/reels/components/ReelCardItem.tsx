@@ -321,7 +321,7 @@ export const ReelCardItem: React.FC<ReelCardItemProps> = ({
       )}
 
       {/* Right Action Bar (TikTok/Reels Layout) */}
-      <div className="absolute right-3.5 bottom-[calc(2.5rem+env(safe-area-inset-bottom,0px))] z-30 flex flex-col items-center gap-4 select-none">
+      <div className="absolute right-3.5 bottom-safe-reel-actions z-30 flex flex-col items-center gap-4 select-none">
         {/* Author Profile Avatar + Follow CTA Badge */}
         <div className="relative mb-2">
           <Link href={`/profile/${reel.author.username}`}>
@@ -437,7 +437,7 @@ export const ReelCardItem: React.FC<ReelCardItemProps> = ({
       </div>
 
       {/* Bottom-Left Information Overlay */}
-      <div className="absolute left-3.5 bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] right-20 z-30 space-y-2 text-white select-none">
+      <div className="absolute left-3.5 bottom-safe-reel-caption right-20 z-30 space-y-2 text-white select-none">
         {/* Author Header */}
         <div className="flex items-center gap-2">
           <Link

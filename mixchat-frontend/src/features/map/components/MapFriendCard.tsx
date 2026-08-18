@@ -53,7 +53,7 @@ export const MapFriendCard: React.FC<MapFriendCardProps> = ({
       : null;
 
     return (
-      <div className="absolute left-3 right-3 sm:left-6 sm:right-auto sm:w-96 bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] sm:bottom-6 z-30 pointer-events-auto animate-in slide-in-from-bottom-5 duration-200">
+      <div className="absolute left-3 right-3 sm:left-6 sm:right-auto sm:w-96 bottom-safe-map-card sm:bottom-6 z-30 pointer-events-auto animate-in slide-in-from-bottom-5 duration-200">
         <div className="relative rounded-3xl bg-[#0b0f19]/95 border border-white/20 p-4 shadow-2xl backdrop-blur-xl space-y-3.5">
           {/* Dismiss Button */}
           <button
@@ -172,7 +172,7 @@ export const MapFriendCard: React.FC<MapFriendCardProps> = ({
   if (friends.length === 0) return null;
 
   return (
-    <div className="absolute left-3 right-3 sm:left-4 sm:right-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] sm:bottom-5 z-25 pointer-events-none">
+    <div className="absolute left-3 right-3 sm:left-4 sm:right-4 bottom-safe-map-card sm:bottom-5 z-25 pointer-events-none">
       <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar scroll-smooth py-1 pointer-events-auto">
         {friends.map((friend) => {
           const distance = userCoords
