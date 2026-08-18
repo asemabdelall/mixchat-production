@@ -29,7 +29,7 @@ export default function AuthLayout({
   }
 
   return (
-    <main className="fixed inset-0 w-full h-full flex items-center justify-center p-4 bg-[#070914] overflow-y-auto custom-scrollbar text-foreground">
+    <main className="fixed inset-0 w-screen h-screen flex items-center justify-center p-4 bg-[#070914] overflow-y-auto custom-scrollbar text-foreground">
       {/* Glow Orbs Backdrop */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-purple-600/15 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-blue-600/15 rounded-full blur-[130px] pointer-events-none" />

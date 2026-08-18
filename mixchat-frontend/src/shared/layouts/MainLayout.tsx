@@ -62,7 +62,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <div
-      className="fixed inset-0 w-full h-full flex flex-col overflow-hidden bg-[#090c15] text-foreground selection:bg-purple-500 selection:text-white"
+      className="fixed inset-0 w-screen h-screen flex flex-col overflow-hidden bg-[#090c15] text-foreground selection:bg-purple-500 selection:text-white"
       suppressHydrationWarning
     >
       {/* Desktop Sidebar (fixed left) */}
