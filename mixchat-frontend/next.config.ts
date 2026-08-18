@@ -79,6 +79,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/feed",
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {
