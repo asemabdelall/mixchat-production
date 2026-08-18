@@ -45,7 +45,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
   if (status === "loading" || !isAuthenticated) {
     return (
       <div
-        className="fixed inset-0 h-[100dvh] w-full flex flex-col items-center justify-center bg-[#070913] text-white"
+        className="fixed inset-0 w-full h-full flex flex-col items-center justify-center bg-[#070913] text-white"
         suppressHydrationWarning
       >
         <div className="flex flex-col items-center gap-3" suppressHydrationWarning>
@@ -62,7 +62,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <div
-      className="fixed inset-0 h-[100dvh] w-full flex flex-col overflow-hidden bg-[#090c15] text-foreground selection:bg-purple-500 selection:text-white"
+      className="fixed inset-0 w-full h-full flex flex-col overflow-hidden bg-[#090c15] text-foreground selection:bg-purple-500 selection:text-white"
       suppressHydrationWarning
     >
       {/* Desktop Sidebar (fixed left) */}

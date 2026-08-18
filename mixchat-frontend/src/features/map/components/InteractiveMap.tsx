@@ -209,7 +209,7 @@ export const InteractiveMap: React.FC = () => {
   };
 
   return (
-    <div className="relative h-[calc(100dvh-10.5rem)] min-h-[420px] w-full md:h-[calc(100dvh-7rem)] rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#070913] select-none flex flex-col">
+    <div className="relative h-[calc(100vh-10.5rem)] min-h-[420px] w-full md:h-[calc(100vh-7rem)] rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#070913] select-none flex flex-col">
       {/* 1. Minimal Snapchat-Grade Floating Control Bar */}
       <MapControls
         isGhostMode={settings.isGhostMode}

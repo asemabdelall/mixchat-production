@@ -171,7 +171,7 @@ export const ReelFeedViewer: React.FC = () => {
   const activeReel = reels[activeIndex];
 
   return (
-    <div className="relative w-full h-[100dvh] bg-[#070913] overflow-hidden flex items-center justify-center select-none">
+    <div className="relative w-full h-full bg-[#070913] overflow-hidden flex items-center justify-center select-none">
       {/* Ambient Glow / Backdrop */}
       {activeReel?.video.posterUrl && (
         // eslint-disable-next-line @next/next/no-img-element

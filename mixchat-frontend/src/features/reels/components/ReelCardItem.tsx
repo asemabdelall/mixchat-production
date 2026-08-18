@@ -237,7 +237,7 @@ export const ReelCardItem: React.FC<ReelCardItemProps> = ({
   const isSelf = reel.author.id === user?.id;
 
   return (
-    <div className="relative w-full h-[100dvh] lg:h-full flex items-center justify-center bg-black snap-start overflow-hidden select-none">
+    <div className="relative w-full h-full flex items-center justify-center bg-black snap-start overflow-hidden select-none">
       {/* Background Video Element */}
       <video
         ref={videoRef}
