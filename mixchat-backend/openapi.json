@@ -203,7 +203,7 @@
             "mixchat_refresh_token": []
           }
         ],
-        "summary": "Rotate refresh token via HttpOnly cookie and issue new access token",
+        "summary": "Rotate refresh token via HttpOnly cookie or header and issue new access token",
         "tags": [
           "Authentication & Sessions"
         ]
@@ -6006,6 +6006,11 @@
           "accessToken": {
             "type": "string",
             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "refreshToken": {
+            "type": "string",
+            "example": "d8e4f1a2...",
+            "description": "Rotating refresh token for cross-origin and mobile PWA fallback storage"
           }
         },
         "required": [

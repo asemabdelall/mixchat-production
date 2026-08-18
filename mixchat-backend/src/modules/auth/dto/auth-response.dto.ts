@@ -97,7 +97,8 @@ export class AuthResponseDto {
   @ApiPropertyOptional({
     type: String,
     example: 'd8e4f1a2...',
-    description: 'Rotating refresh token for cross-origin and mobile PWA fallback storage',
+    description:
+      'Rotating refresh token for cross-origin and mobile PWA fallback storage',
   })
   refreshToken?: string;
 }

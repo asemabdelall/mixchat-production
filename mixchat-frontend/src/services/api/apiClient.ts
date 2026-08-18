@@ -116,7 +116,6 @@ class ApiClient {
           headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
-            ...(storedRefreshToken ? { "x-refresh-token": storedRefreshToken } : {}),
           },
           body: JSON.stringify({
             refreshToken: storedRefreshToken || undefined,

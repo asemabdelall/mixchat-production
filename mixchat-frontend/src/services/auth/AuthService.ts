@@ -12,7 +12,7 @@ export const authService = {
    * Register a new user and store access token in memory
    */
   async register(data: RegisterDto): Promise<UserDto> {
-    const res = await apiClient.post<AuthResponseDto & { refreshToken?: string }>(
+    const res = await apiClient.post<AuthResponseDto>(
       "/auth/register",
       data,
       {
@@ -30,7 +30,7 @@ export const authService = {
    * Login with email or username and store access token in memory
    */
   async login(data: LoginDto): Promise<UserDto> {
-    const res = await apiClient.post<AuthResponseDto & { refreshToken?: string }>(
+    const res = await apiClient.post<AuthResponseDto>(
       "/auth/login",
       data,
       {
@@ -61,7 +61,12 @@ export const authService = {
    */
   async logout(): Promise<void> {
     try {
-      await apiClient.post("/auth/logout", {}, { skipAuthRefresh: true });
+      const refreshToken = apiClient.getRefreshToken();
+      await apiClient.post(
+        "/auth/logout",
+        { refreshToken: refreshToken || undefined },
+        { skipAuthRefresh: true },
+      );
     } finally {
       apiClient.setAccessToken(null);
       apiClient.setRefreshToken(null);
