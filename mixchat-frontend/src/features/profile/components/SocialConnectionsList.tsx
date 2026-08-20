@@ -185,10 +185,7 @@ export const SocialConnectionsList: React.FC<SocialConnectionsListProps> = ({
                     className="flex items-center gap-3.5 flex-1 overflow-hidden group"
                   >
                     <Avatar
-                      src={
-                        u.avatarUrl ||
-                        "/mixchat-icon.png"
-                      }
+                      src={u.avatarUrl}
                       alt={u.displayName}
                       size="md"
                       online={true}

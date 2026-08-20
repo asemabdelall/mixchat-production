@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, MaxLength, IsEnum } from 'class-validator';
+import { IsString, IsOptional, MaxLength, IsEnum, IsIn } from 'class-validator';
 import { PostVisibility } from '@prisma/client';
+import { POST_BACKGROUND_THEMES } from '../post-background-theme.constants';
 
 export class UpdatePostDto {
   @ApiPropertyOptional({
@@ -29,4 +30,14 @@ export class UpdatePostDto {
   @IsString()
   @MaxLength(100)
   locationTag?: string;
+
+  @ApiPropertyOptional({
+    enum: POST_BACKGROUND_THEMES,
+    description: 'Visual theme for a text-only post',
+    example: 'velvet',
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(POST_BACKGROUND_THEMES)
+  backgroundTheme?: string;
 }

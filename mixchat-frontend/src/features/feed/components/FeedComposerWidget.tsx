@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { AvatarImage } from "@/shared/components/ui/AvatarImage";
 import { Image as ImageIcon, Film } from "lucide-react";
 import { useAuth } from "@/shared/providers/AuthProvider";
 
@@ -16,12 +17,10 @@ export const FeedComposerWidget: React.FC<FeedComposerWidgetProps> = ({
   const { user } = useAuth();
   const displayName = user?.displayName || user?.username || "Friend";
   const firstName = displayName.split(" ")[0];
-  const avatarUrl = user?.avatarUrl || "/mixchat-icon.png";
+  const avatarUrl = user?.avatarUrl;
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-[#111728]/90 via-[#0c101d]/95 to-[#070913]/95 backdrop-blur-2xl p-4 sm:p-5 shadow-2xl shadow-purple-950/20 transition-all duration-300 hover:border-purple-500/30 group select-none">
-      {/* Subtle Top Ambient Glow Line */}
-      <div className="absolute top-0 inset-x-10 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
       <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none" />
 
       {/* Main Composer Row */}
@@ -30,8 +29,7 @@ export const FeedComposerWidget: React.FC<FeedComposerWidgetProps> = ({
         <div className="relative shrink-0">
           <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 shadow-md">
             <div className="w-full h-full rounded-full overflow-hidden bg-[#070913]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <AvatarImage
                 src={avatarUrl}
                 alt={displayName}
                 className="w-full h-full object-cover"
@@ -52,7 +50,7 @@ export const FeedComposerWidget: React.FC<FeedComposerWidgetProps> = ({
       </div>
 
       {/* Media Action Pills Row */}
-      <div className="pt-3.5 mt-3.5 border-t border-white/5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+      <div className="pt-3.5 mt-3.5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Photo Button */}
           <button

@@ -38,6 +38,7 @@ interface PostWithRelations {
   content: string | null;
   visibility: PostVisibility;
   locationTag: string | null;
+  backgroundTheme: string | null;
   likesCount: number;
   commentsCount: number;
   repostsCount: number;
@@ -155,6 +156,7 @@ export class PostsService {
       content: post.content || '',
       visibility: post.visibility,
       locationTag: post.locationTag,
+      backgroundTheme: post.backgroundTheme,
       media: mediaItems,
       stats: {
         likesCount: post.likesCount,
@@ -185,6 +187,13 @@ export class PostsService {
       throw new BadRequestException({
         code: 'POST_INVALID_CONTENT',
         message: 'A post must contain text content or at least one media item',
+      });
+    }
+
+    if (dto.backgroundTheme && mediaIds.length > 0) {
+      throw new BadRequestException({
+        code: 'POST_BACKGROUND_REQUIRES_TEXT_ONLY',
+        message: 'A post background can only be used without attached media',
       });
     }
 
@@ -227,6 +236,7 @@ export class PostsService {
           content,
           visibility: dto.visibility || PostVisibility.PUBLIC,
           locationTag: dto.locationTag?.trim() || null,
+          backgroundTheme: dto.backgroundTheme || null,
           media: {
             create: mediaIds.map((mediaObjectId, index) => ({
               mediaObjectId,
@@ -1084,6 +1094,13 @@ export class PostsService {
 
     this.postsPolicy.assertCanModify(userId, post);
 
+    if (dto.backgroundTheme && post.media.length > 0) {
+      throw new BadRequestException({
+        code: 'POST_BACKGROUND_REQUIRES_TEXT_ONLY',
+        message: 'A post background can only be used without attached media',
+      });
+    }
+
     const updated = await this.prisma.post.update({
       where: { id: postId },
       data: {
@@ -1093,6 +1110,10 @@ export class PostsService {
           dto.locationTag !== undefined
             ? dto.locationTag.trim() || null
             : post.locationTag,
+        backgroundTheme:
+          dto.backgroundTheme !== undefined
+            ? dto.backgroundTheme
+            : post.backgroundTheme,
         editedAt: new Date(),
       },
       include: {

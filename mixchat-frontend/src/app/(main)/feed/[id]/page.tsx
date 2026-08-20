@@ -3,16 +3,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   ArrowLeft,
   Loader2,
   AlertCircle,
   MessageCircle,
-  Heart,
-  Share2,
-  Bookmark,
-  Repeat2,
   Sparkles,
   ChevronDown,
 } from "lucide-react";
@@ -31,6 +27,7 @@ export default function PostDetailPage() {
   const params = useParams();
   const router = useRouter();
   const postId = params.id as string;
+  const shouldReduceMotion = useReducedMotion();
 
   const [post, setPost] = useState<Post | null>(null);
   const [isLoadingPost, setIsLoadingPost] = useState<boolean>(true);
@@ -185,35 +182,68 @@ export default function PostDetailPage() {
     );
   };
 
+  const focusDiscussion = useCallback(() => {
+    commentsTopRef.current?.scrollIntoView({
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+
+    window.requestAnimationFrame(() => {
+      commentsTopRef.current?.parentElement
+        ?.querySelector<HTMLInputElement>('input[type="text"]')
+        ?.focus();
+    });
+  }, [shouldReduceMotion]);
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="max-w-2xl mx-auto pb-20 select-none"
+      className="relative mx-auto max-w-6xl pb-20 select-auto"
     >
-      {/* Premium Sticky Header Bar */}
-      <div className="sticky top-0 z-20 -mx-3 sm:-mx-6 lg:-mx-8 px-3 sm:px-6 lg:px-8 mb-5">
-        <div className="flex items-center justify-between py-3 px-1">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[36rem] overflow-hidden"
+      >
+        <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-purple-600/10 blur-3xl" />
+        <div className="absolute -right-24 top-52 h-72 w-72 rounded-full bg-blue-500/[0.08] blur-3xl" />
+      </div>
+
+      {/* Contextual page header */}
+      <header className="sticky top-0 z-20 -mx-3 mb-5 bg-gradient-to-b from-background via-background/95 to-background/0 px-3 pb-4 pt-1 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:-mx-8 lg:mb-7 lg:px-8">
+        <div className="grid min-h-12 grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
           <button
+            type="button"
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-xs font-semibold text-white/70 hover:text-white active:scale-95 transition-all cursor-pointer group"
+            className="group flex min-h-11 w-fit cursor-pointer items-center gap-2 justify-self-start rounded-full pr-3 text-sm font-semibold text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white active:bg-white/10"
+            aria-label="Go back"
           >
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.06] group-hover:bg-white/[0.12] border border-white/10 transition-colors">
-              <ArrowLeft className="h-4 w-4" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] transition-colors group-hover:bg-white/[0.1]">
+              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
             </div>
             <span className="hidden sm:inline">Back</span>
           </button>
 
-          <h2 className="text-sm font-extrabold text-white tracking-tight">
-            Post
-          </h2>
+          <div className="min-w-0 text-center">
+            <h1 className="text-base font-extrabold tracking-tight text-white sm:text-lg">
+              Post
+            </h1>
+            <p className="hidden text-xs font-medium text-white/45 sm:block">
+              View the post and join the conversation
+            </p>
+          </div>
 
-          <div className="w-8" />
+          <div className="flex min-w-11 justify-end justify-self-end" aria-hidden="true">
+            {post && !isLoadingPost && (
+              <span className="rounded-full bg-purple-500/10 px-3 py-1.5 text-xs font-bold tabular-nums text-purple-300">
+                {formatNumber(post.commentsCount)} comments
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* Loading State — Premium Skeleton */}
       <AnimatePresence mode="wait">
         {isLoadingPost && (
           <motion.div
@@ -221,42 +251,45 @@ export default function PostDetailPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="space-y-5"
+            className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)] lg:items-start lg:gap-7"
+            aria-label="Loading post"
           >
-            {/* Post Skeleton */}
-            <div className="rounded-3xl border border-white/10 bg-[#111728]/60 p-5 space-y-4 animate-pulse">
+            <div className="animate-pulse space-y-5 rounded-[1.75rem] bg-[#111728]/70 p-5 sm:p-7">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full bg-white/10" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-3.5 w-32 bg-white/10 rounded-full" />
-                  <div className="h-2.5 w-24 bg-white/5 rounded-full" />
+                <div className="h-14 w-14 rounded-full bg-white/10" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-36 rounded-full bg-white/10" />
+                  <div className="h-3 w-28 rounded-full bg-white/5" />
                 </div>
               </div>
               <div className="space-y-2">
-                <div className="h-3 w-full bg-white/10 rounded-full" />
-                <div className="h-3 w-3/5 bg-white/10 rounded-full" />
+                <div className="h-4 w-full rounded-full bg-white/10" />
+                <div className="h-4 w-3/5 rounded-full bg-white/10" />
               </div>
-              <div className="h-64 w-full bg-white/5 rounded-2xl" />
-              <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                <div className="flex items-center gap-6">
-                  <div className="h-5 w-14 bg-white/10 rounded-full" />
-                  <div className="h-5 w-14 bg-white/10 rounded-full" />
-                  <div className="h-5 w-14 bg-white/10 rounded-full" />
+              <div className="aspect-[4/3] w-full rounded-2xl bg-white/[0.05]" />
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-5">
+                  <div className="h-10 w-14 rounded-xl bg-white/[0.07]" />
+                  <div className="h-10 w-14 rounded-xl bg-white/[0.07]" />
+                  <div className="h-10 w-14 rounded-xl bg-white/[0.07]" />
                 </div>
-                <div className="h-5 w-5 bg-white/10 rounded-full" />
+                <div className="h-11 w-11 rounded-full bg-white/[0.07]" />
               </div>
             </div>
 
-            {/* Comments Skeleton */}
-            <div className="rounded-3xl border border-white/10 bg-[#111728]/40 p-5 space-y-4 animate-pulse">
-              <div className="h-4 w-28 bg-white/10 rounded-full" />
+            <div className="animate-pulse space-y-4 rounded-[1.75rem] bg-[#0d1322]/80 p-5 sm:p-6">
+              <div className="h-12 w-full rounded-2xl bg-white/[0.06]" />
+              <div className="h-24 w-full rounded-2xl bg-purple-500/[0.06]" />
               {[1, 2, 3].map((n) => (
-                <div key={n} className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/10 shrink-0" />
+                <div
+                  key={n}
+                  className="flex items-start gap-3 rounded-2xl bg-white/[0.025] p-3"
+                >
+                  <div className="h-9 w-9 shrink-0 rounded-full bg-white/10" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-3 w-24 bg-white/10 rounded-full" />
-                    <div className="h-3 w-full bg-white/5 rounded-full" />
-                    <div className="h-3 w-4/5 bg-white/5 rounded-full" />
+                    <div className="h-3 w-24 rounded-full bg-white/10" />
+                    <div className="h-3 w-full rounded-full bg-white/5" />
+                    <div className="h-3 w-4/5 rounded-full bg-white/5" />
                   </div>
                 </div>
               ))}
@@ -265,135 +298,102 @@ export default function PostDetailPage() {
         )}
       </AnimatePresence>
 
-      {/* Error / Not Found State */}
       <AnimatePresence>
         {error && !isLoadingPost && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="rounded-3xl border border-white/10 bg-gradient-to-b from-[#111728]/80 to-[#070913]/90 p-10 text-center space-y-5 backdrop-blur-xl"
+            className="mx-auto max-w-xl space-y-5 rounded-[1.75rem] bg-gradient-to-b from-[#111728]/90 to-[#070913]/95 p-8 text-center shadow-2xl shadow-black/20 sm:p-12"
+            role="alert"
           >
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shadow-[0_0_30px_rgba(244,63,94,0.15)]">
-              <AlertCircle className="h-7 w-7" />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/15 text-rose-300 shadow-[0_0_30px_rgba(244,63,94,0.12)]">
+              <AlertCircle className="h-7 w-7" aria-hidden="true" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-lg font-extrabold text-white">
+              <h2 className="text-xl font-extrabold text-white">
                 Post Unavailable
-              </h3>
-              <p className="text-sm text-white/50 max-w-sm mx-auto leading-relaxed">
+              </h2>
+              <p className="mx-auto max-w-sm text-sm leading-relaxed text-white/60">
                 {error}
               </p>
             </div>
             <Link
               href="/feed"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-bg-primary text-white text-xs font-bold shadow-lg shadow-purple-500/25 hover:opacity-90 active:scale-95 transition-all"
+              className="gradient-bg-primary inline-flex min-h-11 items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-purple-500/25 transition-opacity hover:opacity-90 active:opacity-80"
             >
-              <ArrowLeft className="h-3.5 w-3.5" />
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               <span>Return to Feed</span>
             </Link>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Post + Discussion */}
       {post && !isLoadingPost && (
-        <motion.div
-          initial="hidden"
-          animate="show"
-          variants={{
-            hidden: { opacity: 0 },
-            show: {
-              opacity: 1,
-              transition: { staggerChildren: 0.1 },
-            },
-          }}
-          className="space-y-5"
-        >
-          {/* The Post Card */}
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)] lg:items-start lg:gap-7">
           <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 16 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
-              },
-            }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="min-w-0"
           >
-            <FeedPostCard post={post} onPostDeleted={handlePostDeleted} />
+            <FeedPostCard
+              post={post}
+              variant="detail"
+              commentsCountOverride={post.commentsCount}
+              onCommentRequested={focusDiscussion}
+              onPostDeleted={handlePostDeleted}
+            />
           </motion.div>
 
-          {/* Engagement Summary Bar */}
           <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 12 },
-              show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.4,
+              delay: shouldReduceMotion ? 0 : 0.06,
+              ease: [0.22, 1, 0.36, 1],
             }}
-            className="flex items-center justify-between rounded-2xl bg-white/[0.03] border border-white/[0.06] px-5 py-3"
+            className="scroll-mt-24 overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-[#101727]/90 to-[#090e19]/95 shadow-2xl shadow-black/20 lg:sticky lg:top-24"
           >
-            <div className="flex items-center gap-5">
-              <div className="flex items-center gap-1.5 text-pink-400/80">
-                <Heart className="h-4 w-4" />
-                <span className="text-xs font-bold">
-                  {formatNumber(post.likesCount)} likes
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 text-purple-400/80">
-                <Repeat2 className="h-4 w-4" />
-                <span className="text-xs font-bold">
-                  {formatNumber(post.repostsCount || 0)} reposts
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 text-cyan-400/80">
-                <Share2 className="h-4 w-4" />
-                <span className="text-xs font-bold">
-                  {formatNumber(post.sharesCount)} shares
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 text-white/40">
-              <Bookmark className="h-4 w-4" />
-            </div>
-          </motion.div>
-
-          {/* ─── Discussion Thread Section ─── */}
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 12 },
-              show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
-            }}
-            className="rounded-3xl border border-white/10 bg-gradient-to-b from-[#111728]/70 to-[#0c101d]/80 backdrop-blur-xl overflow-hidden"
-          >
-            {/* Section Header */}
             <div
               ref={commentsTopRef}
-              className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]"
+              className="flex items-center justify-between gap-4 px-5 pb-3 pt-5 sm:px-6 sm:pt-6"
             >
               <div className="flex items-center gap-2.5">
-                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-purple-500/15 border border-purple-500/25">
-                  <MessageCircle className="w-4 h-4 text-purple-400" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-500/15 text-purple-300 shadow-[0_0_24px_rgba(168,85,247,0.12)]">
+                  <MessageCircle
+                    className="h-5 w-5"
+                    aria-hidden="true"
+                  />
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-white">
-                    Discussion
-                  </h3>
-                  <p className="text-[11px] text-white/40 font-medium">
+                  <h2 className="text-base font-extrabold text-white sm:text-lg">
+                    Conversation
+                  </h2>
+                  <p
+                    className="text-xs font-medium text-white/55"
+                    aria-live="polite"
+                  >
                     {post.commentsCount === 0
-                      ? "Be the first to comment"
-                      : `${formatNumber(post.commentsCount)} comment${post.commentsCount !== 1 ? "s" : ""}`}
+                      ? "Be the first to respond"
+                      : `${formatNumber(post.commentsCount)} response${post.commentsCount !== 1 ? "s" : ""}`}
                   </p>
                 </div>
               </div>
+              {comments.length > 0 && (
+                <span className="rounded-full bg-white/[0.05] px-3 py-1.5 text-xs font-bold tabular-nums text-white/60">
+                  {formatNumber(comments.length)} shown
+                </span>
+              )}
             </div>
 
-            {/* Comment Composer Box — Top Position */}
-            <div className="px-5 py-4 border-b border-white/[0.06] bg-white/[0.015]">
+            <div className="mx-3 mb-3 rounded-2xl bg-purple-500/[0.065] p-3 sm:mx-4 sm:mb-4 sm:p-4">
               <CommentComposer
                 placeholder={
                   replyTarget
                     ? `Reply to @${replyTarget.author?.username || "user"}...`
-                    : "Write a comment..."
+                    : "Add to the conversation..."
                 }
                 replyingTo={
                   replyTarget && replyTarget.author
@@ -410,28 +410,34 @@ export default function PostDetailPage() {
               />
             </div>
 
-            {/* Comments List */}
-            <div className="px-4 sm:px-5">
+            <div className="px-3 pb-4 sm:px-4 sm:pb-5">
               {isLoadingComments && comments.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
-                  <span className="text-xs text-white/40 font-medium">
-                    Loading comments...
+                <div
+                  className="flex flex-col items-center justify-center gap-3 py-16"
+                  aria-live="polite"
+                >
+                  <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
+                  <span className="text-sm font-medium text-white/50">
+                    Loading conversation...
                   </span>
                 </div>
               ) : comments.length > 0 ? (
-                <div className="divide-y divide-white/[0.04]">
+                <div className="space-y-2.5">
                   {comments.map((comment, idx) => (
                     <motion.div
                       key={comment.id}
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={
+                        shouldReduceMotion ? false : { opacity: 0, y: 10 }
+                      }
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
-                        duration: 0.3,
-                        delay: Math.min(idx * 0.04, 0.5),
+                        duration: 0.28,
+                        delay: shouldReduceMotion
+                          ? 0
+                          : Math.min(idx * 0.035, 0.35),
                         ease: [0.25, 0.46, 0.45, 0.94],
                       }}
-                      className="py-3"
+                      className="rounded-2xl bg-white/[0.025] p-1.5 transition-colors hover:bg-white/[0.045] sm:p-2"
                     >
                       <CommentItem
                         comment={comment}
@@ -443,22 +449,25 @@ export default function PostDetailPage() {
                   ))}
 
                   {hasNextPage && (
-                    <div className="py-4 text-center">
+                    <div className="pt-2 text-center">
                       <button
                         type="button"
                         onClick={loadMoreComments}
                         disabled={isLoadingComments}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-xs font-bold text-purple-300 hover:text-white transition-all cursor-pointer disabled:opacity-50 active:scale-95"
+                        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-white/[0.05] px-5 py-2.5 text-sm font-bold text-purple-300 transition-colors hover:bg-white/[0.09] hover:text-white active:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {isLoadingComments ? (
                           <>
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            <Loader2 className="h-4 w-4 animate-spin" />
                             <span>Loading...</span>
                           </>
                         ) : (
                           <>
-                            <ChevronDown className="h-3.5 w-3.5" />
-                            <span>Load more comments</span>
+                            <ChevronDown
+                              className="h-4 w-4"
+                              aria-hidden="true"
+                            />
+                            <span>Show more comments</span>
                           </>
                         )}
                       </button>
@@ -466,25 +475,24 @@ export default function PostDetailPage() {
                   )}
                 </div>
               ) : (
-                /* Empty State */
-                <div className="flex flex-col items-center justify-center py-14 space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shadow-[0_0_25px_rgba(168,85,247,0.1)]">
-                    <Sparkles className="h-6 w-6 text-purple-400" />
+                <div className="flex flex-col items-center justify-center space-y-4 px-4 py-14">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-300 shadow-[0_0_25px_rgba(168,85,247,0.1)]">
+                    <Sparkles className="h-7 w-7" aria-hidden="true" />
                   </div>
-                  <div className="text-center space-y-1">
-                    <p className="text-sm font-bold text-white">
-                      No comments yet
-                    </p>
-                    <p className="text-xs text-white/40 max-w-xs mx-auto leading-relaxed">
-                      Start the conversation — share your thoughts about this
-                      post.
+                  <div className="space-y-1.5 text-center">
+                    <h3 className="text-base font-bold text-white">
+                      Start the conversation
+                    </h3>
+                    <p className="mx-auto max-w-xs text-sm leading-relaxed text-white/55">
+                      Share a thought, ask a question, or leave a reaction for
+                      the author.
                     </p>
                   </div>
                 </div>
               )}
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </motion.div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useChat } from "@/shared/providers/ChatProvider";
 import { GroupDetailsModal } from "./GroupDetailsModal";
 import { DirectDetailsModal } from "./DirectDetailsModal";
@@ -18,6 +18,7 @@ import { useAuth } from "@/shared/providers/AuthProvider";
 
 export const ChatRoom: React.FC = () => {
   const { user } = useAuth();
+  const shouldReduceMotion = useReducedMotion();
   const {
     activeChat,
     messages,
@@ -387,15 +388,22 @@ export const ChatRoom: React.FC = () => {
   };
 
   return (
-    <div className="relative flex-1 flex flex-col h-full bg-[#070913] overflow-hidden">
+    <div className="relative flex h-full flex-1 flex-col overflow-hidden bg-[#070913] lg:rounded-3xl">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(124,58,237,0.08),transparent_32%),radial-gradient(circle_at_82%_82%,rgba(37,99,235,0.06),transparent_30%)]"
+      />
       {/* Toast */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            initial={
+              shouldReduceMotion ? false : { opacity: 0, y: -20, scale: 0.95 }
+            }
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            className="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-purple-600/90 backdrop-blur-md text-white text-xs font-semibold shadow-2xl border border-purple-400/30 pointer-events-none"
+            className="pointer-events-none fixed left-1/2 top-5 z-50 -translate-x-1/2 rounded-full bg-purple-600/95 px-4 py-2.5 text-sm font-semibold text-white shadow-2xl backdrop-blur-md"
+            role="status"
           >
             {toastMessage}
           </motion.div>
@@ -419,7 +427,7 @@ export const ChatRoom: React.FC = () => {
       {/* Main Conversation Area */}
       <motion.div
         key={activeChat.id}
-        initial={{ opacity: 0, scale: 0.99 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.99 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.2 }}
         className="flex-1 flex flex-col min-h-0 relative"
@@ -428,10 +436,12 @@ export const ChatRoom: React.FC = () => {
         <AnimatePresence>
           {showSearch && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
+              initial={
+                shouldReduceMotion ? false : { height: 0, opacity: 0 }
+              }
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
               className="overflow-hidden"
             >
               <ChatSearchBar
@@ -477,15 +487,17 @@ export const ChatRoom: React.FC = () => {
               element.scrollTop = element.scrollHeight - previousHeight;
             });
           }}
-          className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-3 bg-[#090c15]/80"
+          className="custom-scrollbar relative flex-1 space-y-1.5 overflow-y-auto overscroll-contain bg-[#090c15]/55 px-3 py-4 sm:px-5 sm:py-5 lg:px-6"
+          role="log"
+          aria-label="Conversation messages"
         >
           {isLoadingOlder && (
-            <p className="text-center text-xs text-white/50">
+            <p className="py-2 text-center text-sm font-medium text-white/55" role="status">
               Loading older messages…
             </p>
           )}
           {isLoadingMessages && messages.length === 0 && (
-            <p className="text-center text-xs text-white/50">
+            <p className="py-8 text-center text-sm font-medium text-white/55" role="status">
               Loading messages…
             </p>
           )}
@@ -518,6 +530,7 @@ export const ChatRoom: React.FC = () => {
             return (
               <div
                 key={msg.id}
+                className="mx-auto w-full max-w-4xl"
                 style={{
                   contentVisibility: "auto",
                   containIntrinsicSize: "0 80px",
@@ -550,10 +563,15 @@ export const ChatRoom: React.FC = () => {
           <AnimatePresence>
             {activeTypers.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                initial={
+                  shouldReduceMotion
+                    ? false
+                    : { opacity: 0, y: 10, scale: 0.95 }
+                }
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                className="flex items-center gap-2 p-3 rounded-2xl max-w-[220px] bg-white/[0.06] border border-white/10 text-white/70 text-xs backdrop-blur-md"
+                className="mx-auto flex w-full max-w-4xl items-center gap-2 px-10 py-2 text-sm text-white/65"
+                role="status"
               >
                 <div className="flex items-center gap-1">
                   <span

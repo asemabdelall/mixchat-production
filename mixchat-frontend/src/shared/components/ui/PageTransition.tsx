@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
 
 /**
@@ -17,19 +17,34 @@ export const PageTransition: React.FC<{ children: React.ReactNode }> = ({
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <motion.div
-      key={pathname}
-      initial={shouldReduceMotion ? false : { opacity: 0 }}
-      animate={{
-        opacity: 1,
-        transition: {
-          duration: shouldReduceMotion ? 0 : 0.16,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        },
-      }}
-      className="h-full w-full"
-    >
-      {children}
-    </motion.div>
+    <AnimatePresence initial={false} mode="popLayout">
+      <motion.div
+        key={pathname}
+        initial={
+          shouldReduceMotion
+            ? false
+            : { opacity: 0, y: 10, scale: 0.997 }
+        }
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={
+          shouldReduceMotion
+            ? { opacity: 1 }
+            : { opacity: 0, y: -5, scale: 0.999 }
+        }
+        transition={
+          shouldReduceMotion
+            ? { duration: 0 }
+            : {
+                opacity: { duration: 0.2, ease: "easeOut" },
+                y: { type: "spring", stiffness: 430, damping: 38, mass: 0.7 },
+                scale: { duration: 0.2, ease: "easeOut" },
+              }
+        }
+        className="h-full w-full origin-top transform-gpu"
+        style={shouldReduceMotion ? undefined : { willChange: "transform, opacity" }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 };

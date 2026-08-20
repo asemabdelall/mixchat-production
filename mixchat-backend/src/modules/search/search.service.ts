@@ -467,6 +467,7 @@ export class SearchService {
           content: post.content || '',
           visibility: post.visibility,
           locationTag: post.locationTag,
+          backgroundTheme: post.backgroundTheme,
           stats: {
             likesCount: post.likesCount,
             commentsCount: post.commentsCount,
@@ -875,6 +876,7 @@ export class SearchService {
           content: post.content || '',
           visibility: post.visibility,
           locationTag: post.locationTag,
+          backgroundTheme: post.backgroundTheme,
           stats: {
             likesCount: post.likesCount,
             commentsCount: post.commentsCount,

@@ -11,6 +11,7 @@ import {
   Lock,
 } from "lucide-react";
 import { Card } from "@/shared/components/ui/Card";
+import { AvatarImage } from "@/shared/components/ui/AvatarImage";
 import { ProfileActionBar } from "./ProfileActionBar";
 import { RelationshipState } from "@/services/social/socialService";
 
@@ -109,12 +110,8 @@ export const ProfileHeroV2: React.FC<ProfileHeroV2Props> = ({
             {/* Dark Isolation Ring Gap */}
             <div className="p-[3px] bg-[#090c17] rounded-full">
               <div className="w-22 h-22 sm:w-26 sm:h-26 rounded-full overflow-hidden bg-white/5 relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={
-                    user.avatarUrl ||
-                    "/mixchat-icon.png"
-                  }
+                <AvatarImage
+                  src={user.avatarUrl}
                   alt={user.displayName}
                   className="w-full h-full object-cover"
                 />

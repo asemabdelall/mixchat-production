@@ -7,6 +7,7 @@ import { ChatModule } from '../chat/chat.module';
 import { StoriesModule } from '../stories/stories.module';
 import { RedisModule } from '../../infrastructure/redis/redis.module';
 import { PrismaModule } from '../../infrastructure/database/prisma.module';
+import { PlacesService } from './places.service';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { PrismaModule } from '../../infrastructure/database/prisma.module';
     forwardRef(() => ChatModule),
   ],
   controllers: [MapController],
-  providers: [MapService, LocationVisibilityPolicy],
+  providers: [MapService, PlacesService, LocationVisibilityPolicy],
   exports: [MapService, LocationVisibilityPolicy],
 })
 export class MapModule {}

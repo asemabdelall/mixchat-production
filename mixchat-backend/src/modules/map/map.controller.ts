@@ -4,6 +4,7 @@ import {
   Patch,
   Put,
   Delete,
+  Post,
   Body,
   UseGuards,
   Header,
@@ -21,6 +22,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { UpdateLocationSettingsDto } from './dto/update-location-settings.dto';
+import { PlacesService } from './places.service';
+import {
+  PlaceSuggestionDto,
+  ReverseGeocodeDto,
+} from './dto/reverse-geocode.dto';
 import {
   LocationSettingsResponseDto,
   MapFriendsResponseDto,
@@ -33,7 +39,29 @@ import {
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('access-token')
 export class MapController {
-  constructor(private readonly mapService: MapService) {}
+  constructor(
+    private readonly mapService: MapService,
+    private readonly placesService: PlacesService,
+  ) {}
+
+  @Post('places/reverse')
+  @HttpCode(HttpStatus.OK)
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Resolve the user-selected coordinates to a nearby place',
+    description:
+      'User-triggered reverse geocoding with server-side rate limiting and caching. Coordinates are not persisted.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Nearest place label',
+    type: PlaceSuggestionDto,
+  })
+  async reverseGeocode(
+    @Body() dto: ReverseGeocodeDto,
+  ): Promise<PlaceSuggestionDto> {
+    return this.placesService.reverseGeocode(dto);
+  }
 
   @Get('settings')
   @ApiOperation({

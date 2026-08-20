@@ -13,6 +13,7 @@ export function ServiceWorkerRegister() {
       try {
         const registration = await navigator.serviceWorker.register("/sw.js", {
           scope: "/",
+          updateViaCache: "none",
         });
         await registration.update().catch(() => {});
       } catch {

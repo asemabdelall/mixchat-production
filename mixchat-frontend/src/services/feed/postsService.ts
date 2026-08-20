@@ -1,4 +1,5 @@
 import { apiClient } from "../api/apiClient";
+import { DEFAULT_AVATAR_URL } from "@/shared/constants/avatar";
 import type { components } from "../api/types/api.generated";
 import { Post, User } from "@/types";
 
@@ -74,9 +75,7 @@ export function mapDtoToPost(item: PostFeedItemDto): Post {
     id: item.author.id,
     username: item.author.username,
     displayName: item.author.displayName || item.author.username,
-    avatar:
-      item.author.avatarUrl ||
-      "/mixchat-icon.png",
+    avatar: item.author.avatarUrl || DEFAULT_AVATAR_URL,
     role: item.author.isVerified ? "verified" : "user",
     online: false,
     isPremium: item.author.isPremium,
@@ -102,6 +101,7 @@ export function mapDtoToPost(item: PostFeedItemDto): Post {
     isReposted: item.viewer.hasReposted,
     createdAt: formatPostTime(item.createdAt),
     locationTag: item.locationTag || undefined,
+    backgroundTheme: item.backgroundTheme || undefined,
     audience,
   };
 }

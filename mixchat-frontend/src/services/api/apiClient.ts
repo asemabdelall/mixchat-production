@@ -30,6 +30,15 @@ class ApiClient {
 
   private lastUserData: unknown = null;
 
+  private clearSessionAndNotify() {
+    this.setAccessToken(null);
+    this.setRefreshToken(null);
+    this.lastUserData = null;
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("mixchat:unauthorized"));
+    }
+  }
+
   constructor() {
     this.baseUrl =
       process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
@@ -123,14 +132,21 @@ class ApiClient {
           credentials: "include",
         });
 
-        if (!res.ok) {
-          this.setAccessToken(null);
-          this.setRefreshToken(null);
-          this.lastUserData = null;
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("mixchat:unauthorized"));
-          }
+        if (res.status === 401) {
+          this.clearSessionAndNotify();
           return null;
+        }
+
+        if (!res.ok) {
+          const error: ApiClientError = {
+            code: `REFRESH_HTTP_${res.status}`,
+            message: "Unable to restore the session right now.",
+            statusCode: res.status,
+            isNetworkError: false,
+            isTimeout: false,
+            timestamp: new Date().toISOString(),
+          };
+          throw error;
         }
 
         const data = (await res.json()) as {
@@ -145,14 +161,13 @@ class ApiClient {
         }
         this.lastUserData = data.user || null;
         return newAccessToken;
-      } catch {
+      } catch (error) {
+        // A timeout, offline state, CORS/deployment issue, or server error does
+        // not mean the refresh token is invalid. Keep it so a later retry can
+        // restore the same session instead of forcing a new login.
         this.setAccessToken(null);
-        this.setRefreshToken(null);
         this.lastUserData = null;
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("mixchat:unauthorized"));
-        }
-        return null;
+        throw error;
       } finally {
         this.refreshPromise = null;
       }

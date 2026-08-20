@@ -34,6 +34,7 @@ export const ReelFeedViewer: React.FC = () => {
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [showSoundHint, setShowSoundHint] = useState<boolean>(false);
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
   const [reloadKey, setReloadKey] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
@@ -170,6 +171,16 @@ export const ReelFeedViewer: React.FC = () => {
 
   const activeReel = reels[activeIndex];
 
+  const handleAutoplayBlocked = useCallback(() => {
+    setIsMuted(true);
+    setShowSoundHint(true);
+  }, []);
+
+  const handleMutedChange = useCallback((muted: boolean) => {
+    setIsMuted(muted);
+    if (!muted) setShowSoundHint(false);
+  }, []);
+
   return (
     <div className="relative w-full h-full bg-[#070913] overflow-hidden flex items-center justify-center select-none">
       {/* Ambient Glow / Backdrop */}
@@ -275,7 +286,9 @@ export const ReelFeedViewer: React.FC = () => {
                 isActive={index === activeIndex}
                 shouldPreload={Math.abs(index - activeIndex) <= 1}
                 isMuted={isMuted}
-                onToggleMute={() => setIsMuted((prev) => !prev)}
+                showSoundHint={showSoundHint}
+                onMutedChange={handleMutedChange}
+                onAutoplayBlocked={handleAutoplayBlocked}
                 onNext={() => scrollToReel(activeIndex + 1)}
                 onPrev={() => scrollToReel(activeIndex - 1)}
               />

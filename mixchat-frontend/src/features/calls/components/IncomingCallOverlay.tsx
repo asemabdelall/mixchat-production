@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
+import { AvatarImage } from '@/shared/components/ui/AvatarImage';
 import { Phone, PhoneOff, Video } from 'lucide-react';
 
 interface IncomingCallOverlayProps {
@@ -52,21 +52,11 @@ export function IncomingCallOverlay({
           <div className="absolute -inset-8 rounded-full border border-indigo-500/20" />
 
           <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl bg-slate-800">
-            {caller.avatarUrl ? (
-              <Image
-                src={caller.avatarUrl}
-                alt={caller.displayName || caller.username}
-                fill
-                className="object-cover"
-                sizes="160px"
-                priority
-                unoptimized
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-4xl sm:text-5xl font-bold bg-gradient-to-br from-indigo-600 to-sky-500 text-white">
-                {(caller.displayName || caller.username).charAt(0).toUpperCase()}
-              </div>
-            )}
+            <AvatarImage
+              src={caller.avatarUrl}
+              alt={caller.displayName || caller.username}
+              className="h-full w-full object-cover"
+            />
           </div>
         </div>
 

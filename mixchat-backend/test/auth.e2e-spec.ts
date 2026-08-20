@@ -199,6 +199,35 @@ describe('Auth & Session Lifecycle (e2e)', () => {
       .expect(401);
   });
 
+  it('should prefer the current JSON refresh token over a stale browser cookie', async () => {
+    const login = await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .send({ identifier: testUser.email, password: testUser.password })
+      .expect(200);
+    const loginBody = login.body as AuthResponseBody;
+    const staleCookie = (login.get('Set-Cookie') || [])
+      .find((cookie) => cookie.includes('mixchat_refresh_token'))!
+      .split(';')[0];
+
+    const firstRefresh = await request(app.getHttpServer())
+      .post('/api/v1/auth/refresh')
+      .send({ refreshToken: loginBody.refreshToken })
+      .expect(200);
+    const currentToken = (firstRefresh.body as AuthResponseBody).refreshToken;
+    expect(currentToken).toBeDefined();
+
+    const restored = await request(app.getHttpServer())
+      .post('/api/v1/auth/refresh')
+      .set('Cookie', [staleCookie])
+      .send({ refreshToken: currentToken })
+      .expect(200);
+    const restoredBody = restored.body as AuthResponseBody;
+
+    expect(restoredBody.accessToken).toBeDefined();
+    expect(restoredBody.refreshToken).toBeDefined();
+    expect(restoredBody.refreshToken).not.toBe(currentToken);
+  });
+
   it('POST /api/auth/logout-all should revoke all user sessions', async () => {
     // Login session 1
     const login1 = await request(app.getHttpServer())

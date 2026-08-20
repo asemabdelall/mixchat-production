@@ -26,8 +26,9 @@ import {
   PresenceUpdatePayload,
   ReadReceiptPayload,
 } from "@/services/api/realtimeEvents";
+import { DEFAULT_AVATAR_URL } from "@/shared/constants/avatar";
 
-const FALLBACK_AVATAR = "/mixchat-icon.png";
+const FALLBACK_AVATAR = DEFAULT_AVATAR_URL;
 const MAX_MESSAGES_PER_CONVERSATION = 300;
 
 const keepRecentMessages = (messages: Message[]) =>

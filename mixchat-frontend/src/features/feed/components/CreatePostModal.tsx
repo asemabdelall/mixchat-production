@@ -20,6 +20,7 @@ import {
   AtSign,
   Hash,
   Plus,
+  LocateFixed,
 } from "lucide-react";
 import { Modal } from "@/shared/components/ui/Modal";
 import { Avatar } from "@/shared/components/ui/Avatar";
@@ -28,6 +29,12 @@ import { mediaService, MediaObjectDto } from "@/services/media/mediaService";
 import { postsService, mapDtoToPost } from "@/services/feed/postsService";
 import { offlineStorage } from "@/services/storage/offlineStorage";
 import { Post } from "@/types";
+import {
+  getPostBackgroundTheme,
+  POST_BACKGROUND_THEMES,
+  type PostBackgroundThemeId,
+} from "../postBackgroundThemes";
+import { mapService } from "@/services/map/MapService";
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -71,35 +78,6 @@ const POPULAR_LOCATIONS = [
   "Paris, France",
 ];
 
-const BACKGROUND_THEMES = [
-  { id: "none", className: "", label: "Default" },
-  {
-    id: "sunset",
-    className: "bg-gradient-to-tr from-rose-600 via-orange-500 to-amber-400 text-white font-extrabold",
-    label: "Sunset",
-  },
-  {
-    id: "velvet",
-    className: "bg-gradient-to-tr from-purple-900 via-indigo-950 to-pink-900 text-white font-extrabold",
-    label: "Velvet",
-  },
-  {
-    id: "cyber",
-    className: "bg-gradient-to-tr from-cyan-600 via-blue-700 to-indigo-900 text-white font-extrabold",
-    label: "Cyber",
-  },
-  {
-    id: "neon",
-    className: "bg-gradient-to-tr from-fuchsia-600 via-pink-600 to-rose-500 text-white font-extrabold",
-    label: "Neon",
-  },
-  {
-    id: "emerald",
-    className: "bg-gradient-to-tr from-emerald-600 via-teal-700 to-cyan-900 text-white font-extrabold",
-    label: "Emerald",
-  },
-];
-
 export const CreatePostModal: React.FC<CreatePostModalProps> = ({
   isOpen,
   onClose,
@@ -125,9 +103,20 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
   // Media & Metadata State
   const [mediaItems, setMediaItems] = useState<SelectedMediaItem[]>([]);
-  const [locationTag, setLocationTag] = useState<string>("");
+  const [locationTag, setLocationTag] = useState<string>(() => {
+    if (typeof window === "undefined" || !user?.id) return "";
+    return offlineStorage.getPostDraft(user.id)?.locationTag || "";
+  });
   const [selectedFeeling, setSelectedFeeling] = useState<{ label: string; emoji: string } | null>(null);
-  const [selectedBgTheme, setSelectedBgTheme] = useState<string>("none");
+  const [selectedBgTheme, setSelectedBgTheme] = useState<
+    PostBackgroundThemeId | "none"
+  >(() => {
+    if (typeof window === "undefined" || !user?.id) return "none";
+    const saved = offlineStorage.getPostDraft(user.id)?.backgroundTheme;
+    return POST_BACKGROUND_THEMES.some((theme) => theme.id === saved)
+      ? (saved as PostBackgroundThemeId)
+      : "none";
+  });
 
   // UI Interactive Drawers
   const [isAudienceDropdownOpen, setIsAudienceDropdownOpen] = useState(false);
@@ -135,6 +124,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [customLocationInput, setCustomLocationInput] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [nearbyLocations, setNearbyLocations] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -180,10 +172,12 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         content,
         visibility: audience,
         locationTag: locationTag || undefined,
+        backgroundTheme:
+          selectedBgTheme === "none" ? undefined : selectedBgTheme,
         updatedAt: Date.now(),
       });
     }
-  }, [content, audience, locationTag, user]);
+  }, [content, audience, locationTag, selectedBgTheme, user]);
 
   // Handle media file upload pipeline
   const handleFilesSelected = async (
@@ -288,6 +282,57 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     textareaRef.current?.focus();
   };
 
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation || isDetectingLocation) {
+      if (!navigator.geolocation) {
+        setLocationError("Location is not supported by this browser.");
+      }
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    setLocationError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        void mapService
+          .reverseGeocode({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            language: navigator.language,
+          })
+          .then((place) => {
+            setLocationTag(place.label);
+            setNearbyLocations(place.alternatives);
+            setCustomLocationInput("");
+          })
+          .catch(() => {
+            setLocationError(
+              "We found your coordinates but could not name this place. You can enter it manually.",
+            );
+          })
+          .finally(() => setIsDetectingLocation(false));
+      },
+      (error) => {
+        setIsDetectingLocation(false);
+        setLocationError(
+          error.code === error.PERMISSION_DENIED
+            ? "Allow location access in your browser settings, then try again."
+            : "Your location is unavailable right now. Please try again.",
+        );
+      },
+      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
+    );
+  };
+
+  const handleLocationDrawerToggle = () => {
+    if (activeDrawer === "location") {
+      setActiveDrawer("none");
+      return;
+    }
+    setActiveDrawer("location");
+    if (!locationTag) handleUseCurrentLocation();
+  };
+
   const isAnyMediaUploading = mediaItems.some((m) => m.isUploading);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -318,6 +363,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         mediaObjectIds: readyMediaIds.length > 0 ? readyMediaIds : undefined,
         visibility: audience,
         locationTag: locationTag || undefined,
+        backgroundTheme:
+          selectedBgTheme === "none" ? undefined : selectedBgTheme,
       });
 
       const uiPost = mapDtoToPost(createdDto);
@@ -348,7 +395,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
   };
 
-  const currentTheme = BACKGROUND_THEMES.find((t) => t.id === selectedBgTheme) || BACKGROUND_THEMES[0];
+  const currentTheme = getPostBackgroundTheme(selectedBgTheme);
   const isColoredMode = selectedBgTheme !== "none" && mediaItems.length === 0;
 
   return (
@@ -357,17 +404,18 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       onClose={onClose}
       title="Create Post"
       maxWidth="lg"
-      className="p-0 overflow-hidden"
+      mobilePresentation="fullscreen"
+      contentClassName="overflow-hidden p-0 pr-0"
     >
       <form
         onSubmit={handleSubmit}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className="flex flex-col max-h-[82vh]"
+        className="flex h-full min-h-0 flex-col"
       >
         {/* Scrollable Container */}
-        <div className="overflow-y-auto custom-scrollbar p-5 space-y-4 flex-1">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 custom-scrollbar sm:p-5">
           {/* User Profile Bar & Custom Audience Selector */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
@@ -531,7 +579,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
           {/* Text Area (Standard vs Styled Facebook Card) */}
           <div
             className={`relative rounded-2xl transition-all duration-200 ${isColoredMode
-                ? `p-6 min-h-[200px] flex items-center justify-center text-center shadow-lg ${currentTheme.className}`
+              ? `p-6 min-h-[200px] flex items-center justify-center text-center shadow-lg ${currentTheme?.className ?? ""}`
                 : "bg-transparent"
               }`}
           >
@@ -552,6 +600,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 }`}
               style={{ outline: "none", border: "none", boxShadow: "none" }}
               autoFocus
+              data-modal-autofocus
             />
 
             {/* Exit colored mode button */}
@@ -559,8 +608,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedBgTheme("none")}
-                className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white transition-colors"
+                className="absolute right-2.5 top-2.5 flex h-11 w-11 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
                 title="Remove colored background"
+                aria-label="Remove colored background"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -571,15 +621,25 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
           {mediaItems.length === 0 && activeDrawer === "themes" && (
             <div className="flex items-center gap-2 p-2 rounded-2xl bg-white/5 border border-white/10 overflow-x-auto no-scrollbar">
               <span className="text-xs font-bold text-white/60 px-2">Theme:</span>
-              {BACKGROUND_THEMES.map((theme) => (
+              <button
+                type="button"
+                onClick={() => setSelectedBgTheme("none")}
+                aria-label="Use default post background"
+                aria-pressed={selectedBgTheme === "none"}
+                className={`h-11 w-11 shrink-0 rounded-xl border bg-white/10 transition-transform active:scale-95 ${
+                  selectedBgTheme === "none"
+                    ? "border-purple-300 ring-2 ring-purple-400"
+                    : "border-white/20"
+                }`}
+              />
+              {POST_BACKGROUND_THEMES.map((theme) => (
                 <button
                   key={theme.id}
                   type="button"
                   onClick={() => setSelectedBgTheme(theme.id)}
-                  className={`h-8 w-8 rounded-xl shrink-0 transition-transform active:scale-95 border ${theme.id === "none"
-                      ? "bg-white/10 border-white/20"
-                      : `${theme.className} border-white/30`
-                    } ${selectedBgTheme === theme.id ? "ring-2 ring-purple-400 scale-110" : "hover:scale-105"}`}
+                  aria-label={`Use ${theme.label} post background`}
+                  aria-pressed={selectedBgTheme === theme.id}
+                  className={`h-11 w-11 rounded-xl shrink-0 transition-transform active:scale-95 border ${theme.className} border-white/30 ${selectedBgTheme === theme.id ? "ring-2 ring-purple-400 scale-105" : "hover:scale-105"}`}
                   title={theme.label}
                 />
               ))}
@@ -726,6 +786,30 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 </button>
               </div>
 
+              <button
+                type="button"
+                onClick={handleUseCurrentLocation}
+                disabled={isDetectingLocation}
+                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-blue-400/25 bg-blue-500/12 px-4 text-sm font-bold text-blue-200 transition-colors hover:bg-blue-500/20 disabled:cursor-wait disabled:opacity-60"
+              >
+                {isDetectingLocation ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <LocateFixed className="h-4 w-4" aria-hidden="true" />
+                )}
+                <span>
+                  {isDetectingLocation
+                    ? "Finding nearby place…"
+                    : "Use my current location"}
+                </span>
+              </button>
+
+              {locationError && (
+                <p role="alert" className="text-xs leading-relaxed text-rose-300">
+                  {locationError}
+                </p>
+              )}
+
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
                   <MapPin className="h-4 w-4 text-blue-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -742,7 +826,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                         setActiveDrawer("none");
                       }
                     }}
-                    className="w-full rounded-xl bg-white/[0.06] border border-white/15 pl-9 pr-3 py-2 text-xs text-white placeholder:text-white/35 focus:outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    aria-label="Search or enter a place"
+                    className="min-h-11 w-full rounded-xl border border-white/15 bg-white/[0.06] py-2 pl-9 pr-3 text-base text-white transition-all placeholder:text-white/35 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-xs"
                   />
                 </div>
                 {customLocationInput.trim() && (
@@ -753,7 +838,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       setCustomLocationInput("");
                       setActiveDrawer("none");
                     }}
-                    className="px-3 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-500"
+                    className="min-h-11 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white hover:bg-blue-500"
                   >
                     Set
                   </button>
@@ -762,8 +847,13 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
               {/* Location Suggestions */}
               <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                <span className="text-[11px] text-white/40 mr-1">Suggestions:</span>
-                {POPULAR_LOCATIONS.map((loc) => (
+                <span className="mr-1 text-[11px] text-white/40">
+                  {nearbyLocations.length > 0 ? "Nearby:" : "Popular:"}
+                </span>
+                {(nearbyLocations.length > 0
+                  ? nearbyLocations
+                  : POPULAR_LOCATIONS
+                ).map((loc) => (
                   <button
                     key={loc}
                     type="button"
@@ -771,12 +861,20 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       setLocationTag(loc);
                       setActiveDrawer("none");
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-blue-500/20 hover:text-blue-300 text-[11px] text-white/70 transition-colors border border-white/5"
+                    className="min-h-11 rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-xs text-white/70 transition-colors hover:bg-blue-500/20 hover:text-blue-300"
                   >
                     {loc}
                   </button>
                 ))}
               </div>
+              <a
+                href="https://www.openstreetmap.org/copyright"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-11 items-center text-[11px] text-white/45 underline-offset-2 hover:text-white/70 hover:underline"
+              >
+                Location data © OpenStreetMap contributors
+              </a>
             </div>
           )}
         </div>
@@ -799,17 +897,18 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         />
 
         {/* Bottom "Add to your post" Action Bar & Submit */}
-        <div className="p-4 border-t border-white/10 bg-[#090d1a]/80 backdrop-blur-md space-y-3 shrink-0">
+        <div className="shrink-0 space-y-3 border-t border-white/10 bg-[#090d1a]/92 p-3 pb-[max(0.75rem,var(--sab))] backdrop-blur-xl sm:p-4">
           {/* Facebook/Instagram "Add to your post" Toolbar Container */}
-          <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-            <span className="text-xs font-bold text-white/80 pl-1">Add to your post</span>
+          <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-1.5 shadow-inner sm:justify-between sm:p-2.5">
+            <span className="hidden pl-1 text-xs font-bold text-white/80 sm:block">Add to your post</span>
 
-            <div className="flex items-center gap-1 sm:gap-1.5">
+            <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto no-scrollbar sm:flex-none sm:gap-1.5">
               {/* Photo Button */}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 rounded-xl text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all"
+                aria-label="Add photos"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-emerald-400 transition-all hover:bg-emerald-500/20 active:scale-95"
                 title="Photo / Images"
               >
                 <ImageIcon className="h-5 w-5" />
@@ -819,7 +918,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <button
                 type="button"
                 onClick={() => videoInputRef.current?.click()}
-                className="p-2 rounded-xl text-cyan-400 hover:bg-cyan-500/20 active:scale-95 transition-all"
+                aria-label="Add video"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-cyan-400 transition-all hover:bg-cyan-500/20 active:scale-95"
                 title="Video"
               >
                 <Video className="h-5 w-5" />
@@ -829,7 +929,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <button
                 type="button"
                 onClick={handleAddMention}
-                className="p-2 rounded-xl text-blue-400 hover:bg-blue-500/20 active:scale-95 transition-all"
+                aria-label="Mention someone"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-blue-400 transition-all hover:bg-blue-500/20 active:scale-95"
                 title="Tag People (@)"
               >
                 <AtSign className="h-5 w-5" />
@@ -839,7 +940,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <button
                 type="button"
                 onClick={handleAddHashtag}
-                className="p-2 rounded-xl text-pink-400 hover:bg-pink-500/20 active:scale-95 transition-all"
+                aria-label="Add hashtag"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-pink-400 transition-all hover:bg-pink-500/20 active:scale-95"
                 title="Add Hashtag (#)"
               >
                 <Hash className="h-5 w-5" />
@@ -851,7 +953,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 onClick={() =>
                   setActiveDrawer((prev) => (prev === "feeling" ? "none" : "feeling"))
                 }
-                className={`p-2 rounded-xl transition-all active:scale-95 ${activeDrawer === "feeling" || selectedFeeling
+                aria-label="Add feeling or activity"
+                aria-pressed={activeDrawer === "feeling"}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all active:scale-95 ${activeDrawer === "feeling" || selectedFeeling
                     ? "bg-amber-500/20 text-amber-300"
                     : "text-amber-400 hover:bg-amber-500/20"
                   }`}
@@ -863,10 +967,10 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               {/* Location Button */}
               <button
                 type="button"
-                onClick={() =>
-                  setActiveDrawer((prev) => (prev === "location" ? "none" : "location"))
-                }
-                className={`p-2 rounded-xl transition-all active:scale-95 ${activeDrawer === "location" || locationTag
+                onClick={handleLocationDrawerToggle}
+                aria-label="Add current location"
+                aria-pressed={activeDrawer === "location"}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all active:scale-95 ${activeDrawer === "location" || locationTag
                     ? "bg-blue-500/20 text-blue-300"
                     : "text-rose-400 hover:bg-rose-500/20"
                   }`}
@@ -882,7 +986,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   onClick={() =>
                     setActiveDrawer((prev) => (prev === "themes" ? "none" : "themes"))
                   }
-                  className={`p-2 rounded-xl transition-all active:scale-95 ${activeDrawer === "themes" || isColoredMode
+                  aria-label="Choose text background"
+                  aria-pressed={activeDrawer === "themes"}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all active:scale-95 ${activeDrawer === "themes" || isColoredMode
                       ? "bg-purple-500/20 text-purple-300"
                       : "text-purple-400 hover:bg-purple-500/20"
                     }`}
@@ -903,7 +1009,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 isAnyMediaUploading ||
                 (!content.trim() && mediaItems.length === 0)
               }
-              className="w-full py-3 rounded-2xl gradient-bg-primary hover:opacity-95 active:scale-[0.99] disabled:opacity-40 disabled:pointer-events-none text-white font-black text-sm tracking-wide shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl py-3 text-sm font-black tracking-wide text-white shadow-xl shadow-purple-900/40 transition-all gradient-bg-primary hover:opacity-95 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-40"
             >
               {isSubmitting ? (
                 <>

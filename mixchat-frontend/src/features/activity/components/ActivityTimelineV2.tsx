@@ -287,10 +287,7 @@ export const ActivityTimelineV2: React.FC = () => {
                     }
                   >
                     <Avatar
-                      src={
-                        notif.actor?.avatarUrl ||
-                        "/mixchat-icon.png"
-                      }
+                      src={notif.actor?.avatarUrl}
                       alt={
                         notif.actor?.displayName ||
                         notif.actor?.username ||

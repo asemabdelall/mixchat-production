@@ -12,6 +12,10 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { MapFriend } from "@/services/map/MapService";
 import { MAP_CONFIG, MIXCHAT_MAP_STYLE } from "../styles/mixchat-map-style";
 import type { UserCoordinates } from "../hooks/useGeolocationSharing";
+import {
+  applyDefaultAvatar,
+  resolveAvatarUrl,
+} from "@/shared/constants/avatar";
 
 export interface MapCanvasHandle {
   recenterOnUser: () => void;
@@ -189,9 +193,8 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
           "w-full h-full rounded-full overflow-hidden bg-[#0b0f19]";
 
         const img = document.createElement("img");
-        img.src =
-          currentUser?.avatarUrl ||
-          "/mixchat-icon.png";
+        img.src = resolveAvatarUrl(currentUser?.avatarUrl);
+        img.onerror = () => applyDefaultAvatar(img);
         img.alt = "You";
         img.className = "w-full h-full object-cover";
         imgWrapper.appendChild(img);
@@ -274,7 +277,10 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
     }, [mapLoaded, friends, selectedFriend, onSelectFriend]);
 
     return (
-      <div className="relative w-full h-full flex-1 overflow-hidden bg-[#070913]">
+      <div
+        className="relative w-full h-full flex-1 overflow-hidden bg-[#070913]"
+        data-pwa-allow-pinch-zoom
+      >
         {/* MapLibre DOM Container */}
         <div ref={mapContainerRef} className="w-full h-full" />
 
@@ -327,14 +333,12 @@ function createFriendMarkerElement(
   imgWrapper.className =
     "w-full h-full rounded-full overflow-hidden bg-[#0b0f19]";
 
-  const avatarSrc =
-    typeof friend.user.avatarUrl === "string" && friend.user.avatarUrl
-      ? friend.user.avatarUrl
-      : "/mixchat-icon.png";
+  const avatarSrc = resolveAvatarUrl(friend.user.avatarUrl);
   const displayName = String(friend.user.displayName || friend.user.username);
 
   const img = document.createElement("img");
   img.src = avatarSrc;
+  img.onerror = () => applyDefaultAvatar(img);
   img.alt = displayName;
   img.className = "w-full h-full object-cover";
   imgWrapper.appendChild(img);

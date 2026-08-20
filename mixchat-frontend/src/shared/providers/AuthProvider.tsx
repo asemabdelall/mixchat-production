@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import {
   authService,
+  AuthSessionExpiredError,
   UserDto,
   LoginDto,
   RegisterDto,
@@ -34,6 +35,29 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const SESSION_RESTORE_RETRY_DELAYS_MS = [0, 400, 1200] as const;
+
+async function restoreSessionWithRetry(): Promise<UserDto> {
+  let lastError: unknown;
+
+  for (const delayMs of SESSION_RESTORE_RETRY_DELAYS_MS) {
+    if (delayMs > 0) {
+      await new Promise((resolve) => window.setTimeout(resolve, delayMs));
+    }
+
+    try {
+      return await authService.refresh();
+    } catch (error) {
+      if (error instanceof AuthSessionExpiredError) {
+        throw error;
+      }
+      lastError = error;
+    }
+  }
+
+  throw lastError;
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -58,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const restoreSession = async () => {
       try {
-        const restoredUser = await authService.refresh();
+        const restoredUser = await restoreSessionWithRetry();
         if (isMounted) {
           setUser(restoredUser);
           setStatus("authenticated");

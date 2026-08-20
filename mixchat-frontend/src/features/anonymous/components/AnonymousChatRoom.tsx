@@ -18,7 +18,6 @@ import {
   Smile,
   CheckCheck,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   AnonymousSessionDto,
@@ -31,6 +30,8 @@ import { AnonymousSafetySheet } from "./AnonymousSafetySheet";
 import { Button } from "@/shared/components/ui/Button";
 import { socialService } from "@/services/social/socialService";
 import { mediaService } from "@/services/media/mediaService";
+import { DEFAULT_AVATAR_URL } from "@/shared/constants/avatar";
+import { AvatarImage } from "@/shared/components/ui/AvatarImage";
 
 interface AnonymousChatRoomProps {
   session: AnonymousSessionDto;
@@ -198,7 +199,7 @@ export const AnonymousChatRoom: React.FC<AnonymousChatRoomProps> = ({
   const partnerPersona = session.partner || {
     id: "anon_partner",
     displayName: "Anonymous Stranger",
-    avatar: "/mixchat-icon.png",
+    avatar: DEFAULT_AVATAR_URL,
     theme: "from-purple-500 to-indigo-500",
   };
 
@@ -213,7 +214,7 @@ export const AnonymousChatRoom: React.FC<AnonymousChatRoomProps> = ({
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="w-11 h-11 rounded-2xl bg-zinc-800 border border-zinc-700/80 overflow-hidden flex items-center justify-center shadow-md">
-              <Image
+              <AvatarImage
                 src={
                   isRevealed && typeof revealedPartner?.avatarUrl === "string"
                     ? revealedPartner.avatarUrl
@@ -224,10 +225,7 @@ export const AnonymousChatRoom: React.FC<AnonymousChatRoomProps> = ({
                     ? revealedPartner.displayName
                     : partnerPersona.displayName
                 }
-                width={44}
-                height={44}
                 className="w-full h-full object-cover"
-                unoptimized
               />
             </div>
             {/* Status Dot */}
@@ -346,17 +344,14 @@ export const AnonymousChatRoom: React.FC<AnonymousChatRoomProps> = ({
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-2xl mx-auto">
               <div className="flex items-center gap-3 text-left">
                 <div className="relative w-12 h-12 rounded-full ring-2 ring-purple-500 overflow-hidden shrink-0">
-                  <Image
+                  <AvatarImage
                     src={
                       typeof revealedPartner.avatarUrl === "string"
                         ? revealedPartner.avatarUrl
                         : partnerPersona.avatar
                     }
                     alt={revealedPartner.displayName}
-                    width={48}
-                    height={48}
                     className="w-full h-full object-cover"
-                    unoptimized
                   />
                 </div>
                 <div>

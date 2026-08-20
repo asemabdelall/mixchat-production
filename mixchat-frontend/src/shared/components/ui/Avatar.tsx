@@ -3,6 +3,10 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
+import {
+  applyDefaultAvatar,
+  resolveAvatarUrl,
+} from "@/shared/constants/avatar";
 
 interface AvatarProps {
   src?: string | null;
@@ -43,7 +47,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   className,
   onClick,
 }) => {
-  const avatarUrl = src || "/mixchat-icon.png";
+  const avatarUrl = resolveAvatarUrl(src);
 
   const content = (
     <>
@@ -56,7 +60,12 @@ export const Avatar: React.FC<AvatarProps> = ({
       >
         {/* Avatar URLs are user-controlled across supported CDN providers. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={avatarUrl} alt={alt} className="h-full w-full object-cover" />
+        <img
+          src={avatarUrl}
+          alt={alt}
+          onError={(event) => applyDefaultAvatar(event.currentTarget)}
+          className="h-full w-full object-cover"
+        />
       </div>
 
       {online !== undefined && (

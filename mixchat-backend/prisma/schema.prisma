@@ -407,20 +407,21 @@ enum PostStatus {
 }
 
 model Post {
-  id             String         @id @default(uuid())
-  authorId       String         @map("author_id")
-  author         User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  content        String         @default("")
-  visibility     PostVisibility @default(PUBLIC)
-  status         PostStatus     @default(PUBLISHED)
-  locationTag    String?        @map("location_tag")
-  likesCount     Int            @default(0) @map("likes_count")
-  commentsCount  Int            @default(0) @map("comments_count")
-  bookmarksCount Int            @default(0) @map("bookmarks_count")
-  repostsCount   Int            @default(0) @map("reposts_count")
-  editedAt       DateTime?      @map("edited_at")
-  createdAt      DateTime       @default(now()) @map("created_at")
-  updatedAt      DateTime       @updatedAt @map("updated_at")
+  id              String         @id @default(uuid())
+  authorId        String         @map("author_id")
+  author          User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content         String         @default("")
+  visibility      PostVisibility @default(PUBLIC)
+  status          PostStatus     @default(PUBLISHED)
+  locationTag     String?        @map("location_tag")
+  backgroundTheme String?        @map("background_theme")
+  likesCount      Int            @default(0) @map("likes_count")
+  commentsCount   Int            @default(0) @map("comments_count")
+  bookmarksCount  Int            @default(0) @map("bookmarks_count")
+  repostsCount    Int            @default(0) @map("reposts_count")
+  editedAt        DateTime?      @map("edited_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
 
   media     PostMedia[]
   likes     PostLike[]

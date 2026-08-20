@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MediaKind, PostVisibility } from '@prisma/client';
+import { POST_BACKGROUND_THEMES } from '../post-background-theme.constants';
 
 export class PostAuthorDto {
   @ApiProperty({
@@ -104,6 +105,13 @@ export class PostFeedItemDto {
     example: 'San Francisco, CA',
   })
   locationTag?: string | null;
+
+  @ApiPropertyOptional({
+    enum: POST_BACKGROUND_THEMES,
+    nullable: true,
+    example: 'velvet',
+  })
+  backgroundTheme?: string | null;
 
   @ApiProperty({ type: [PostMediaItemDto] })
   media!: PostMediaItemDto[];

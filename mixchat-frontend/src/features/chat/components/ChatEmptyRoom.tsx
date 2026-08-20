@@ -12,21 +12,21 @@ export const ChatEmptyRoom: React.FC = () => {
 
   return (
     <>
-      <div className="flex-1 h-full min-w-0 flex flex-col items-center justify-center p-8 glass-panel rounded-none lg:rounded-3xl border-0 lg:border border-white/10 bg-[#070913] lg:bg-[#090c17]/95 text-center select-none space-y-6">
+      <div className="flex h-full min-w-0 flex-1 flex-col items-center justify-center space-y-7 rounded-none bg-[#080c16] p-8 text-center select-none lg:rounded-3xl">
         <div className="relative">
-          <div className="absolute -inset-4 rounded-full gradient-bg-primary opacity-30 blur-xl animate-pulse" />
-          <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl gradient-bg-primary text-white shadow-2xl border border-white/20">
-            <MessageSquare className="h-10 w-10" />
+          <div className="gradient-bg-primary absolute -inset-4 rounded-full opacity-20 blur-xl" />
+          <div className="gradient-bg-primary relative flex h-20 w-20 items-center justify-center rounded-3xl text-white shadow-2xl">
+            <MessageSquare className="h-9 w-9" aria-hidden="true" />
           </div>
         </div>
 
         <div className="max-w-md space-y-2">
-          <h3 className="text-xl font-black text-white tracking-wide">
-            Your conversations live here.
-          </h3>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Select a conversation from the left menu or use one of the quick
-            actions below to connect instantly across Mix Chat.
+          <h2 className="text-2xl font-extrabold tracking-tight text-white">
+            Your conversations live here
+          </h2>
+          <p className="text-base leading-relaxed text-muted-foreground">
+            Choose a conversation or start a new message to connect with
+            someone on MixChat.
           </p>
         </div>
 
@@ -35,9 +35,9 @@ export const ChatEmptyRoom: React.FC = () => {
           <Button
             onClick={() => setShowNewChat(true)}
             size="sm"
-            className="gap-2 font-bold shadow-lg shadow-purple-500/25"
+            className="min-h-11 gap-2 px-5 text-sm font-bold shadow-lg shadow-purple-500/25"
           >
-            <MessageSquare className="h-4 w-4" />
+            <MessageSquare className="h-4 w-4" aria-hidden="true" />
             <span>New Message</span>
           </Button>
 
@@ -45,9 +45,9 @@ export const ChatEmptyRoom: React.FC = () => {
             onClick={() => setShowCreateGroup(true)}
             variant="glass"
             size="sm"
-            className="gap-2 text-purple-300 border-purple-500/30"
+            className="min-h-11 gap-2 px-5 text-sm text-purple-300"
           >
-            <Users className="h-4 w-4 text-purple-400" />
+            <Users className="h-4 w-4 text-purple-400" aria-hidden="true" />
             <span>Start Group</span>
           </Button>
         </div>

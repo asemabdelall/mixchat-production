@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Default MixChat profile picture</title>
+  <desc id="description">A cyan, blue, purple, and pink person silhouette on a deep navy background.</desc>
+  <defs>
+    <radialGradient id="background" cx="50%" cy="46%" r="72%">
+      <stop offset="0" stop-color="#0a1235"/>
+      <stop offset="0.58" stop-color="#05091f"/>
+      <stop offset="1" stop-color="#020513"/>
+    </radialGradient>
+    <linearGradient id="person" x1="14%" y1="9%" x2="88%" y2="91%">
+      <stop offset="0" stop-color="#77f2f2"/>
+      <stop offset="0.32" stop-color="#38bdf8"/>
+      <stop offset="0.55" stop-color="#3b5cff"/>
+      <stop offset="0.76" stop-color="#8b20f4"/>
+      <stop offset="1" stop-color="#f07be9"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0.4 0 0 0 0.1  0 0.5 0 0 0.2  0 0 0.9 0 0.8  0 0 0 0.34 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#background)"/>
+  <g fill="url(#person)" filter="url(#softGlow)">
+    <circle cx="256" cy="158" r="70"/>
+    <path d="M153 414c-14 0-25-11-25-25v-18c0-67 54-121 121-121h14c67 0 121 54 121 121v18c0 14-11 25-25 25H153Z"/>
+  </g>
+</svg>

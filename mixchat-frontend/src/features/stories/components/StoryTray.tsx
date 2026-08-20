@@ -9,6 +9,7 @@ import {
 } from "@/services/stories/storiesService";
 import { StoryViewerModal } from "./StoryViewerModal";
 import { CreateStoryModal } from "./CreateStoryModal";
+import { AvatarImage } from "@/shared/components/ui/AvatarImage";
 
 export const StoryTray: React.FC = () => {
   const { user } = useAuth();
@@ -159,9 +160,8 @@ export const StoryTray: React.FC = () => {
               >
                 <div className="p-[2px] bg-[#090c15] rounded-full">
                   <div className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-full overflow-hidden bg-white/5 relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={user?.avatarUrl || "/mixchat-icon.png"}
+                    <AvatarImage
+                      src={user?.avatarUrl}
                       alt="Your Story"
                       className="w-full h-full object-cover transition-transform duration-300 group-hover/story:scale-110"
                     />
@@ -230,9 +230,8 @@ export const StoryTray: React.FC = () => {
                       {/* Dark Gap between Ring and Photo */}
                       <div className="p-[2px] bg-[#090c15] rounded-full">
                         <div className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-full overflow-hidden bg-white/5 relative">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={group.author.avatarUrl || "/mixchat-icon.png"}
+                          <AvatarImage
+                            src={group.author.avatarUrl}
                             alt={group.author.displayName}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover/story:scale-110"
                           />

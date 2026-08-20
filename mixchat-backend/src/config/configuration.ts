@@ -52,6 +52,10 @@ export interface AppConfig {
     apiKey: string;
     apiSecret: string;
   };
+  geocoding: {
+    baseUrl: string;
+    userAgent: string;
+  };
 }
 
 export default (): AppConfig => ({
@@ -141,5 +145,11 @@ export default (): AppConfig => ({
     url: process.env.LIVEKIT_URL || 'wss://livekit.example.com',
     apiKey: process.env.LIVEKIT_API_KEY || 'devkey',
     apiSecret: process.env.LIVEKIT_API_SECRET || 'secret',
+  },
+  geocoding: {
+    baseUrl:
+      process.env.GEOCODING_BASE_URL || 'https://nominatim.openstreetmap.org',
+    userAgent:
+      process.env.GEOCODING_USER_AGENT || 'MixChat/1.0 (support@mixchat.app)',
   },
 });

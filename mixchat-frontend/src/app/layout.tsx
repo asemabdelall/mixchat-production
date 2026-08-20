@@ -1,12 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Cairo, Inter } from "next/font/google";
 import "./globals.css";
 import "@livekit/components-styles";
 import { AppProviders } from "@/shared/providers/AppProviders";
 
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const cairo = Cairo({
+  subsets: ["arabic"],
+  variable: "--font-arabic",
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -60,7 +67,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${inter.variable} h-full antialiased`}
+      className={`dark ${inter.variable} ${cairo.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body

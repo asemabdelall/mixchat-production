@@ -88,6 +88,7 @@ export interface Post {
   createdAt: string;
   comments?: Comment[];
   locationTag?: string;
+  backgroundTheme?: string;
   audience?: "public" | "friends" | "close_friends";
 }
 

@@ -41,6 +41,29 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * Prefer a token explicitly supplied by the client over the cookie.
+   *
+   * Some PWA/browser combinations can retain a stale third-party cookie while
+   * the app has already persisted the newly rotated token. Choosing the cookie
+   * first would reject an otherwise valid session on the next page load.
+   */
+  private getRefreshToken(req: Request): string {
+    const headerToken = req.headers['x-refresh-token'];
+    const explicitToken =
+      (typeof headerToken === 'string' ? headerToken : undefined) ||
+      (typeof req.body?.refreshToken === 'string'
+        ? req.body.refreshToken
+        : undefined);
+
+    return (
+      explicitToken ||
+      (typeof req.cookies?.['mixchat_refresh_token'] === 'string'
+        ? req.cookies['mixchat_refresh_token']
+        : '')
+    );
+  }
+
   private setRefreshCookie(res: Response, token: string) {
     const isProduction =
       this.configService.get<string>('nodeEnv') === 'production';
@@ -149,11 +172,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponseDto> {
-    const rawRefreshToken =
-      (req.cookies?.['mixchat_refresh_token'] as string) ||
-      (req.headers['x-refresh-token'] as string) ||
-      (req.body?.refreshToken as string) ||
-      '';
+    const rawRefreshToken = this.getRefreshToken(req);
     const ip = req.ip || (req.headers['x-forwarded-for'] as string);
     const userAgent = req.headers['user-agent'];
 
@@ -186,11 +205,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ success: boolean; message: string }> {
-    const rawRefreshToken =
-      (req.cookies?.['mixchat_refresh_token'] as string) ||
-      (req.headers['x-refresh-token'] as string) ||
-      (req.body?.refreshToken as string) ||
-      '';
+    const rawRefreshToken = this.getRefreshToken(req);
     const ip = req.ip || (req.headers['x-forwarded-for'] as string);
 
     await this.authService.logout(rawRefreshToken, undefined, ip);

@@ -11,6 +11,7 @@ export interface PostDraft {
   content: string;
   visibility?: string;
   locationTag?: string;
+  backgroundTheme?: string;
   mediaKeys?: string[];
   updatedAt: number;
 }
