@@ -22,6 +22,22 @@ export type MapFriend = components["schemas"]["MapFriendDto"];
 export type MapFriendsResponse =
   operations["MapController_getFriendsLocations_v1"]["responses"]["200"]["content"]["application/json"];
 
+export interface ReverseGeocodeInput {
+  latitude: number;
+  longitude: number;
+  language?: string;
+}
+
+export interface PlaceSuggestion {
+  label: string;
+  city?: string | null;
+  region?: string | null;
+  country?: string | null;
+  provider: "openstreetmap";
+  attribution: string;
+  alternatives: string[];
+}
+
 export class MapService {
   /**
    * Fetch current location privacy and Ghost Mode settings
@@ -60,6 +76,13 @@ export class MapService {
    */
   async getFriendsLocations(): Promise<MapFriendsResponse> {
     return apiClient.get<MapFriendsResponse>("/map/friends");
+  }
+
+  /**
+   * Resolve a user-selected device coordinate to a compact nearby place label.
+   */
+  async reverseGeocode(data: ReverseGeocodeInput): Promise<PlaceSuggestion> {
+    return apiClient.post<PlaceSuggestion>("/map/places/reverse", data);
   }
 
   /**

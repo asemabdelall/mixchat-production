@@ -4415,6 +4415,44 @@
         ]
       }
     },
+    "/api/v1/map/places/reverse": {
+      "post": {
+        "description": "User-triggered reverse geocoding with server-side rate limiting and caching. Coordinates are not persisted.",
+        "operationId": "MapController_reverseGeocode_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReverseGeocodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Nearest place label",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceSuggestionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Resolve the user-selected coordinates to a nearby place",
+        "tags": [
+          "map"
+        ]
+      }
+    },
     "/api/v1/map/settings": {
       "get": {
         "description": "Returns durable location privacy preferences for the authenticated user",
@@ -7573,6 +7611,18 @@
             "description": "Optional location tag (e.g. city or venue)",
             "example": "San Francisco, CA"
           },
+          "backgroundTheme": {
+            "type": "string",
+            "enum": [
+              "sunset",
+              "velvet",
+              "cyber",
+              "neon",
+              "emerald"
+            ],
+            "description": "Visual theme for a text-only post",
+            "example": "velvet"
+          },
           "mediaObjectIds": {
             "description": "Ordered array of MediaObject IDs attached to this post (max 10)",
             "example": [
@@ -7747,6 +7797,18 @@
             "nullable": true,
             "example": "San Francisco, CA"
           },
+          "backgroundTheme": {
+            "type": "string",
+            "enum": [
+              "sunset",
+              "velvet",
+              "cyber",
+              "neon",
+              "emerald"
+            ],
+            "nullable": true,
+            "example": "velvet"
+          },
           "media": {
             "type": "array",
             "items": {
@@ -7837,6 +7899,18 @@
             "type": "string",
             "description": "Optional location tag",
             "example": "New York, NY"
+          },
+          "backgroundTheme": {
+            "type": "string",
+            "enum": [
+              "sunset",
+              "velvet",
+              "cyber",
+              "neon",
+              "emerald"
+            ],
+            "description": "Visual theme for a text-only post",
+            "example": "velvet"
           }
         }
       },
@@ -9203,6 +9277,79 @@
           "sessionId",
           "watchedMs",
           "maxProgressMs"
+        ]
+      },
+      "ReverseGeocodeDto": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "example": 29.3759,
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "example": 47.9774,
+            "minimum": -180,
+            "maximum": 180
+          },
+          "language": {
+            "type": "string",
+            "example": "en-US"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ]
+      },
+      "PlaceSuggestionDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "example": "Kuwait City, Kuwait"
+          },
+          "city": {
+            "type": "object",
+            "nullable": true,
+            "example": "Kuwait City"
+          },
+          "region": {
+            "type": "object",
+            "nullable": true,
+            "example": "Al Asimah"
+          },
+          "country": {
+            "type": "object",
+            "nullable": true,
+            "example": "Kuwait"
+          },
+          "provider": {
+            "type": "string",
+            "example": "openstreetmap"
+          },
+          "attribution": {
+            "type": "string",
+            "example": "© OpenStreetMap contributors"
+          },
+          "alternatives": {
+            "example": [
+              "Souq Sharq, Kuwait City",
+              "Kuwait City, Al Asimah, Kuwait"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "label",
+          "provider",
+          "attribution",
+          "alternatives"
         ]
       },
       "LocationSettingsResponseDto": {

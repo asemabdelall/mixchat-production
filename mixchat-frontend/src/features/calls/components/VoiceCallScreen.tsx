@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
+import { AvatarImage } from '@/shared/components/ui/AvatarImage';
 import {
   LiveKitRoom,
   RoomAudioRenderer,
@@ -111,21 +111,11 @@ function VoiceCallLayout({
           <div className="absolute -inset-8 rounded-full border border-emerald-500/10" />
 
           <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl bg-slate-800">
-            {typeof partner?.avatarUrl === 'string' && partner.avatarUrl ? (
-              <Image
-                src={partner.avatarUrl}
-                alt={name}
-                fill
-                className="object-cover"
-                sizes="160px"
-                priority
-                unoptimized
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-4xl sm:text-5xl font-bold bg-gradient-to-br from-emerald-600 to-teal-500 text-white">
-                {name.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <AvatarImage
+              src={partner?.avatarUrl}
+              alt={name}
+              className="h-full w-full object-cover"
+            />
           </div>
         </div>
 

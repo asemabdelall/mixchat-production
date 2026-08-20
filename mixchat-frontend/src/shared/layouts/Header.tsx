@@ -3,12 +3,13 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Search, Bell } from "lucide-react";
+import { Search, Bell, Menu } from "lucide-react";
 import { Input } from "@/shared/components/ui/Input";
 import { Avatar } from "@/shared/components/ui/Avatar";
 import { useAuth } from "@/shared/providers/AuthProvider";
 import { useNotifications } from "@/shared/providers/NotificationsProvider";
 import Image from "next/image";
+import { MobileMoreMenu } from "./MobileMoreMenu";
 
 export const Header: React.FC = () => {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ export const Header: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,10 +28,10 @@ export const Header: React.FC = () => {
 
   const isSearchPage = pathname === "/search";
   const displayName = user?.displayName || user?.username || "User";
-  const avatarUrl = user?.avatarUrl || "/mixchat-icon.png";
+  const avatarUrl = user?.avatarUrl;
 
   return (
-    <header className="w-full bg-[#090c15]/90 backdrop-blur-xl border-b border-white/10 px-3 sm:px-4 lg:px-8 pb-2.5 sm:pb-3 pt-safe-header transition-all shadow-sm">
+    <header className="w-full bg-[#090c15]/90 backdrop-blur-xl px-3 sm:px-4 lg:px-8 pb-2.5 sm:pb-3 pt-safe-header transition-all">
       <div className="flex items-center justify-between gap-2.5 sm:gap-4 max-w-7xl mx-auto">
         {/* Mobile & Tablet Logo (Hidden on Desktop since DesktopSidebar already displays brand logo) */}
         <Link
@@ -99,11 +101,21 @@ export const Header: React.FC = () => {
             ) : null}
           </Link>
 
+          <button
+            type="button"
+            onClick={() => setIsMoreOpen(true)}
+            aria-label="Open all navigation options"
+            aria-expanded={isMoreOpen}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-white/80 transition-all hover:bg-white/[0.12] hover:text-white active:scale-95 lg:hidden"
+          >
+            <Menu className="h-4.5 w-4.5" aria-hidden="true" />
+          </button>
+
           {user && (
             <Link
               href="/profile"
               aria-label="View profile"
-              className="lg:hidden flex items-center justify-center w-11 h-11 rounded-full active:scale-95 transition-transform"
+              className="hidden h-11 w-11 items-center justify-center rounded-full transition-transform active:scale-95 sm:flex lg:hidden"
             >
               <Avatar
                 src={avatarUrl}
@@ -114,6 +126,11 @@ export const Header: React.FC = () => {
           )}
         </div>
       </div>
+      <MobileMoreMenu
+        isOpen={isMoreOpen}
+        onClose={() => setIsMoreOpen(false)}
+        notificationCount={unreadCount}
+      />
     </header>
   );
 };

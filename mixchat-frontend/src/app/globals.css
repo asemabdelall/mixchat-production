@@ -22,10 +22,25 @@
     --input: rgba(255, 255, 255, 0.12);
     --ring: #8b5cf6;
     --radius: 0.75rem;
+    --surface-0: #090c15;
+    --surface-1: #0d1220;
+    --surface-2: #121827;
+    --surface-raised: #171e30;
+    --motion-fast: 140ms;
+    --motion-standard: 220ms;
+    --motion-slow: 360ms;
+    --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-exit: cubic-bezier(0.4, 0, 1, 1);
   }
 }
 
 @theme {
+  /* Use the real Inter face directly. The next/font variable also contains an
+   * Arial-based metric fallback, which has Arabic glyphs and would therefore
+   * prevent the browser from ever reaching Cairo in the fallback chain. */
+  --font-sans:
+    "Inter", var(--font-arabic), "Noto Sans Arabic", ui-sans-serif, system-ui,
+    sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -163,6 +178,40 @@ select,
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Separator-free layout language.
+ * Keep full component outlines (cards, inputs, buttons), but remove one-sided
+ * section dividers throughout the app so spacing and surface tone establish
+ * hierarchy instead of hairlines. */
+body .border-t {
+  border-top-width: 0;
+}
+
+body .border-b {
+  border-bottom-width: 0;
+}
+
+body .border-l {
+  border-left-width: 0;
+}
+
+body .border-r {
+  border-right-width: 0;
+}
+
+body .divide-y > :not(:last-child) {
+  border-top-width: 0;
+  border-bottom-width: 0;
+}
+
+body .divide-x > :not(:last-child) {
+  border-left-width: 0;
+  border-right-width: 0;
+}
+
+hr {
+  display: none;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
@@ -193,21 +242,18 @@ select,
   background: rgba(9, 12, 23, 0.6);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .liquid-glass-sidebar {
   background: rgba(9, 12, 23, 0.75);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .liquid-glass-navbar {
   background: rgba(9, 12, 23, 0.55);
   backdrop-filter: blur(24px) saturate(190%);
   -webkit-backdrop-filter: blur(24px) saturate(190%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .liquid-glass-card {
@@ -349,22 +395,12 @@ select,
   color: rgb(196 181 253) !important;
 }
 
-/* UI/UX Pro Max: Clean Non-Glaring Focus System */
+/* Keep a consistent keyboard focus ring on non-form controls. Form fields
+ * own their focus treatment at component level so their rounded borders and
+ * rings are not doubled or overridden globally. */
 :focus-visible:not(input):not(textarea):not(select) {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
-}
-
-input,
-textarea,
-select {
-  outline: none !important;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none !important;
 }
 
 /* Premium Form Elements */
@@ -420,6 +456,31 @@ select:focus {
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
+}
+
+@keyframes emoji-picker-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.emoji-picker-popover {
+  transform-origin: bottom left;
+  animation: emoji-picker-enter var(--motion-standard) var(--ease-enter) both;
+}
+
+.mixchat-emoji-picker.EmojiPickerReact {
+  border: 0;
+  box-shadow: none;
+}
+
+.mixchat-emoji-picker .epr-search-container input {
+  font-size: 16px;
 }
 
 @media (prefers-reduced-motion: reduce) {

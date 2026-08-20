@@ -34,6 +34,8 @@ export interface EnvironmentVariables {
   LIVEKIT_URL?: string;
   LIVEKIT_API_KEY?: string;
   LIVEKIT_API_SECRET?: string;
+  GEOCODING_BASE_URL?: string;
+  GEOCODING_USER_AGENT?: string;
 }
 
 export const envValidationSchema = Joi.object<EnvironmentVariables>({
@@ -105,4 +107,12 @@ export const envValidationSchema = Joi.object<EnvironmentVariables>({
   LIVEKIT_URL: Joi.string().optional().default('wss://livekit.example.com'),
   LIVEKIT_API_KEY: Joi.string().optional().default('devkey'),
   LIVEKIT_API_SECRET: Joi.string().optional().default('secret'),
+  GEOCODING_BASE_URL: Joi.string()
+    .uri()
+    .optional()
+    .default('https://nominatim.openstreetmap.org'),
+  GEOCODING_USER_AGENT: Joi.string()
+    .min(10)
+    .optional()
+    .default('MixChat/1.0 (support@mixchat.app)'),
 });

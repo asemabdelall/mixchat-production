@@ -7,11 +7,25 @@ import { Home, Film, Plus, MessageSquare, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuickCreateModal } from "@/shared/components/ui/QuickCreateModal";
 import { useChat } from "@/shared/providers/ChatProvider";
+import { motion, useReducedMotion } from "framer-motion";
 
 export const MobileNavbar: React.FC = () => {
   const pathname = usePathname();
   const { chats } = useChat();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+
+  const activeIndicator = (
+    <motion.span
+      layoutId="mobile-nav-active-indicator"
+      transition={
+        shouldReduceMotion
+          ? { duration: 0 }
+          : { type: "spring", stiffness: 520, damping: 38, mass: 0.65 }
+      }
+      className="absolute -bottom-1.5 h-1 w-1 rounded-full bg-purple-400 shadow-[0_0_8px_#a855f7]"
+    />
+  );
 
   const totalUnreadCount = chats.reduce(
     (acc, c) => acc + (c.unreadCount || 0),
@@ -20,7 +34,7 @@ export const MobileNavbar: React.FC = () => {
 
   return (
     <>
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 isolate bg-[#090c15] border-t border-white/10 px-3 pt-1 pb-safe-navbar shadow-lg">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 isolate bg-[#090c15] px-3 pt-1 pb-safe-navbar">
         <nav
           aria-label="Mobile Main Navigation"
           className="flex items-center justify-around max-w-lg mx-auto relative select-none"
@@ -39,7 +53,7 @@ export const MobileNavbar: React.FC = () => {
             <div className="relative flex items-center justify-center">
               <Home className="h-5 w-5" />
               {pathname === "/feed" && (
-                <span className="absolute -bottom-1.5 w-1 h-1 rounded-full bg-purple-400 shadow-[0_0_8px_#a855f7]" />
+                activeIndicator
               )}
             </div>
             <span className="text-[10px] mt-1 font-medium">Feed</span>
@@ -59,7 +73,7 @@ export const MobileNavbar: React.FC = () => {
             <div className="relative flex items-center justify-center">
               <Film className="h-5 w-5" />
               {pathname === "/reels" && (
-                <span className="absolute -bottom-1.5 w-1 h-1 rounded-full bg-purple-400 shadow-[0_0_8px_#a855f7]" />
+                activeIndicator
               )}
             </div>
             <span className="text-[10px] mt-1 font-medium">Reels</span>
@@ -93,7 +107,7 @@ export const MobileNavbar: React.FC = () => {
                 </span>
               )}
               {pathname.startsWith("/chat") && (
-                <span className="absolute -bottom-1.5 w-1 h-1 rounded-full bg-purple-400 shadow-[0_0_8px_#a855f7]" />
+                activeIndicator
               )}
             </div>
             <span className="text-[10px] mt-1 font-medium">Chat</span>
@@ -113,7 +127,7 @@ export const MobileNavbar: React.FC = () => {
             <div className="relative flex items-center justify-center">
               <Map className="h-5 w-5" />
               {pathname === "/map" && (
-                <span className="absolute -bottom-1.5 w-1 h-1 rounded-full bg-purple-400 shadow-[0_0_8px_#a855f7]" />
+                activeIndicator
               )}
             </div>
             <span className="text-[10px] mt-1 font-medium">Map</span>

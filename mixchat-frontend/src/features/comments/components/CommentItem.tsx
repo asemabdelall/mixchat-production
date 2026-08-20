@@ -18,6 +18,7 @@ import {
   commentsService,
 } from "../../../services/comments/commentsService";
 import { MentionText } from "./MentionText";
+import { AvatarImage } from "@/shared/components/ui/AvatarImage";
 
 interface CommentItemProps {
   comment: CommentDto;
@@ -193,9 +194,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
             <button
               type="button"
               onClick={handleToggleReplies}
-              className="flex items-center gap-2 text-[11px] text-white/40 hover:text-white font-semibold cursor-pointer py-1 transition-colors"
+              className="flex items-center text-[11px] text-white/40 hover:text-white font-semibold cursor-pointer py-1 transition-colors"
             >
-              <span className="w-5 h-[1px] bg-white/20" />
               <span>
                 {showReplies
                   ? "Hide replies"
@@ -235,18 +235,11 @@ export const CommentItem: React.FC<CommentItemProps> = ({
             isChild ? "w-6 h-6 mt-0.5" : "w-8 h-8 mt-0.5"
           }`}
         >
-          {comment.author?.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={comment.author.avatarUrl}
-              alt={comment.author.displayName || ""}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center font-bold text-[10px] text-purple-300 bg-purple-900/40">
-              {(comment.author?.displayName || "U").slice(0, 1).toUpperCase()}
-            </div>
-          )}
+          <AvatarImage
+            src={comment.author?.avatarUrl}
+            alt={comment.author?.displayName || "User"}
+            className="h-full w-full object-cover"
+          />
         </Link>
 
         {/* Center: Content & Metadata */}
@@ -412,9 +405,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           <button
             type="button"
             onClick={handleToggleReplies}
-            className="flex items-center gap-2.5 text-[11px] text-white/40 hover:text-white font-semibold cursor-pointer py-1 transition-colors group/replyBtn"
+            className="flex items-center text-[11px] text-white/40 hover:text-white font-semibold cursor-pointer py-1 transition-colors"
           >
-            <span className="w-6 h-[1px] bg-white/20 group-hover/replyBtn:bg-white/40 transition-colors" />
             {isLoadingReplies ? (
               <span className="flex items-center gap-1.5">
                 <Loader2 className="w-3 h-3 animate-spin text-purple-400" />

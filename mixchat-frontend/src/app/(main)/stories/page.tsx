@@ -18,6 +18,7 @@ import {
   storiesService,
   StoryGroupDto,
 } from "@/services/stories/storiesService";
+import { AvatarImage } from "@/shared/components/ui/AvatarImage";
 
 export default function StoriesPage() {
   const { user } = useAuth();
@@ -75,7 +76,6 @@ export default function StoriesPage() {
     <div className="max-w-6xl mx-auto space-y-6 pb-20 select-none">
       {/* Top Banner & Actions */}
       <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-purple-950/40 via-[#0c101d]/90 to-pink-950/40 backdrop-blur-2xl p-5 sm:p-6 shadow-2xl">
-        <div className="absolute top-0 inset-x-12 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -179,12 +179,8 @@ export default function StoriesPage() {
             aria-label={ownGroup ? "Open your story" : "Create a story"}
             className="relative aspect-[9/16] rounded-3xl overflow-hidden border border-white/15 bg-gradient-to-b from-[#111728] to-[#070913] group shadow-xl flex flex-col justify-between p-3.5 transition-all duration-300 hover:border-purple-500/40 hover:scale-[1.02] active:scale-95"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={
-                user?.avatarUrl ||
-                "/mixchat-icon.png"
-              }
+            <AvatarImage
+              src={user?.avatarUrl}
               alt="Your Story"
               className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-500"
             />
@@ -245,12 +241,8 @@ export default function StoriesPage() {
                       } shrink-0`}
                     >
                       <div className="w-full h-full rounded-full overflow-hidden bg-[#070913]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                        src={
-                          group.author.avatarUrl ||
-                          "/mixchat-icon.png"
-                        }
+                        <AvatarImage
+                          src={group.author.avatarUrl}
                           alt={group.author.displayName}
                           className="w-full h-full object-cover"
                         />

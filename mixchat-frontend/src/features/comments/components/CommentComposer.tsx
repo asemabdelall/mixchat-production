@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
 import { userService, SocialUserItemDto } from "@/services/user/userService";
 import { useAuth } from "@/shared/providers/AuthProvider";
+import { AvatarImage } from "@/shared/components/ui/AvatarImage";
 
 interface CommentComposerProps {
   placeholder?: string;
@@ -197,18 +198,11 @@ export const CommentComposer: React.FC<CommentComposerProps> = ({
               }`}
             >
               <div className="w-6 h-6 rounded-full overflow-hidden bg-white/10 shrink-0">
-                {item.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.avatarUrl}
-                    alt={item.username}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-purple-300">
-                    {item.username.slice(0, 2).toUpperCase()}
-                  </div>
-                )}
+                <AvatarImage
+                  src={item.avatarUrl}
+                  alt={item.username}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <div className="truncate text-xs">
                 <span className="text-white font-medium">@{item.username}</span>
@@ -242,20 +236,11 @@ export const CommentComposer: React.FC<CommentComposerProps> = ({
       <form onSubmit={handleSubmit} className="flex items-center gap-2.5 pt-1">
         {/* User Avatar */}
         <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 shrink-0 ring-1 ring-white/10">
-          {user?.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={user.avatarUrl}
-              alt={user.displayName || user.username}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-purple-300 bg-purple-900/40">
-              {(user?.displayName || user?.username || "U")
-                .slice(0, 1)
-                .toUpperCase()}
-            </div>
-          )}
+          <AvatarImage
+            src={user?.avatarUrl}
+            alt={user?.displayName || user?.username || "User"}
+            className="h-full w-full object-cover"
+          />
         </div>
 
         {/* Floating Input Pill */}

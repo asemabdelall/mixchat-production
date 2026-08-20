@@ -684,7 +684,7 @@ export const MediaViewerModal: React.FC<MediaViewerModalProps> = ({
             </div>
 
             {/* ═══ RIGHT: Post Details Sidebar ═══ */}
-            <div className="w-full lg:w-[400px] xl:w-[420px] flex flex-col bg-gradient-to-b from-[#0f1422] to-[#0a0e18] border-t lg:border-t-0 lg:border-l border-white/[0.06] overflow-hidden">
+            <div className="w-full lg:w-[400px] xl:w-[420px] flex flex-col bg-gradient-to-b from-[#0f1422] to-[#0a0e18] overflow-hidden">
               {/* Author Header */}
               <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06]">
                 <Link

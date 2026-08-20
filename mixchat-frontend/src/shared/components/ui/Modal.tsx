@@ -12,7 +12,10 @@ interface ModalProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
+  contentClassName?: string;
   maxWidth?: "sm" | "md" | "lg" | "xl" | "full";
+  mobilePresentation?: "dialog" | "sheet" | "fullscreen";
+  closeDisabled?: boolean;
 }
 
 const maxWidths = {
@@ -35,7 +38,10 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   children,
   className,
+  contentClassName,
   maxWidth = "md",
+  mobilePresentation = "dialog",
+  closeDisabled = false,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
@@ -58,9 +64,12 @@ export const Modal: React.FC<ModalProps> = ({
     openModalCount += 1;
 
     const frame = requestAnimationFrame(() => {
+      const preferredFocus = dialogRef.current?.querySelector<HTMLElement>(
+        "[data-modal-autofocus]",
+      );
       const firstFocusable =
         dialogRef.current?.querySelector<HTMLElement>(focusableSelector);
-      (firstFocusable ?? dialogRef.current)?.focus();
+      (preferredFocus ?? firstFocusable ?? dialogRef.current)?.focus();
     });
 
     return () => {
@@ -77,7 +86,7 @@ export const Modal: React.FC<ModalProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
 
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && !closeDisabled) {
         onClose();
         return;
       }
@@ -105,21 +114,28 @@ export const Modal: React.FC<ModalProps> = ({
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [closeDisabled, isOpen, onClose]);
 
   if (!isMounted) return null;
 
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 select-none">
+        <div
+          className={cn(
+            "fixed inset-0 z-[9999] flex select-none",
+            mobilePresentation === "dialog"
+              ? "items-center justify-center p-3 sm:p-4"
+              : "items-end justify-center p-0 sm:items-center sm:p-4",
+          )}
+        >
           {/* Glass Backdrop */}
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            onClick={onClose}
+            onClick={closeDisabled ? undefined : onClose}
             className="fixed inset-0 bg-black/80 backdrop-blur-xl"
             aria-hidden="true"
           />
@@ -129,7 +145,11 @@ export const Modal: React.FC<ModalProps> = ({
             ref={dialogRef}
             tabIndex={-1}
             initial={
-              shouldReduceMotion ? false : { opacity: 0, scale: 0.96, y: 12 }
+              shouldReduceMotion
+                ? false
+                : mobilePresentation === "dialog"
+                  ? { opacity: 0, scale: 0.96, y: 12 }
+                  : { opacity: 0, scale: 0.99, y: 32 }
             }
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 16 }}
@@ -137,17 +157,34 @@ export const Modal: React.FC<ModalProps> = ({
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? titleId : undefined}
+            data-mobile-presentation={mobilePresentation}
             className={cn(
-              "relative z-10 w-full rounded-3xl border border-white/15 bg-gradient-to-b from-[#111728]/95 via-[#0c101d]/95 to-[#070913]/98 backdrop-blur-2xl p-5 sm:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden max-h-[90vh] flex flex-col my-auto",
+              "relative z-10 flex w-full flex-col overflow-hidden border border-white/12 bg-[#0d1220]/98 shadow-[0_20px_60px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
+              mobilePresentation === "dialog"
+                ? "my-auto max-h-[90dvh] rounded-3xl p-5 sm:p-6"
+                : mobilePresentation === "fullscreen"
+                  ? "h-[calc(var(--app-viewport-height)-var(--sat))] max-h-[calc(var(--app-viewport-height)-var(--sat))] rounded-none border-0 bg-[#0d1220] p-0 shadow-none backdrop-blur-none sm:h-auto sm:max-h-[90dvh] sm:rounded-3xl sm:border sm:border-white/12 sm:bg-[#0d1220]/98 sm:shadow-[0_20px_60px_rgba(0,0,0,0.72)] sm:backdrop-blur-2xl"
+                  : "max-h-[min(88dvh,760px)] rounded-t-[1.75rem] rounded-b-none p-0 sm:max-h-[90dvh] sm:rounded-3xl sm:p-6",
               maxWidths[maxWidth],
               className,
             )}
           >
-            {/* Top Accent Gradient Line */}
-            <div className="absolute top-0 inset-x-12 h-[1.5px] bg-gradient-to-r from-transparent via-purple-500/60 to-transparent pointer-events-none" />
+            {mobilePresentation === "sheet" && (
+              <div
+                aria-hidden="true"
+                className="absolute left-1/2 top-1.5 h-1 w-10 -translate-x-1/2 rounded-full bg-white/18 sm:hidden"
+              />
+            )}
 
             {title && (
-              <div className="flex items-center justify-between pb-3.5 border-b border-white/10 mb-4 shrink-0">
+              <div
+                className={cn(
+                  "flex shrink-0 items-center justify-between pb-3.5",
+                  mobilePresentation === "dialog"
+                    ? "mb-4"
+                    : "mb-0 px-4 pt-3 sm:px-6 sm:pt-4",
+                )}
+              >
                 <h3
                   id={titleId}
                   className="text-base sm:text-lg font-black text-white tracking-tight"
@@ -156,14 +193,20 @@ export const Modal: React.FC<ModalProps> = ({
                 </h3>
                 <button
                   onClick={onClose}
+                  disabled={closeDisabled}
                   aria-label="Close modal"
-                  className="flex h-11 w-11 items-center justify-center rounded-full text-white/50 hover:bg-white/10 hover:text-white transition-colors active:scale-90"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white/50"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
             )}
-            <div className="overflow-y-auto custom-scrollbar flex-1 pr-1">
+            <div
+              className={cn(
+                "min-h-0 flex-1 overflow-y-auto pr-1 custom-scrollbar",
+                contentClassName,
+              )}
+            >
               {children}
             </div>
           </motion.div>

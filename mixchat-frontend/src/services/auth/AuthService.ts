@@ -7,6 +7,13 @@ export type SessionResponseDto = components["schemas"]["SessionResponseDto"];
 export type RegisterDto = components["schemas"]["RegisterDto"];
 export type LoginDto = components["schemas"]["LoginDto"];
 
+export class AuthSessionExpiredError extends Error {
+  constructor() {
+    super("Unauthorized or session expired");
+    this.name = "AuthSessionExpiredError";
+  }
+}
+
 export const authService = {
   /**
    * Register a new user and store access token in memory
@@ -51,7 +58,7 @@ export const authService = {
   async refresh(): Promise<UserDto> {
     const result = await apiClient.refreshSession();
     if (!result.accessToken || !result.user) {
-      throw new Error("Unauthorized or session expired");
+      throw new AuthSessionExpiredError();
     }
     return result.user as UserDto;
   },

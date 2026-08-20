@@ -24,13 +24,16 @@ import { CommentsBottomSheet } from "@/features/comments/components/CommentsBott
 import { ReelShareModal } from "./ReelShareModal";
 import { useReelWatchSession } from "../hooks/useReelWatchSession";
 import { formatCompactNumber } from "@/lib/formatters";
+import { AvatarImage } from "@/shared/components/ui/AvatarImage";
 
 interface ReelCardItemProps {
   reel: ReelItemDto;
   isActive: boolean;
   shouldPreload: boolean;
   isMuted: boolean;
-  onToggleMute: () => void;
+  showSoundHint: boolean;
+  onMutedChange: (muted: boolean) => void;
+  onAutoplayBlocked: () => void;
   onNext?: () => void;
   onPrev?: () => void;
   onReelUpdated?: (updated: ReelItemDto) => void;
@@ -41,7 +44,9 @@ export const ReelCardItem: React.FC<ReelCardItemProps> = ({
   isActive,
   shouldPreload,
   isMuted,
-  onToggleMute,
+  showSoundHint,
+  onMutedChange,
+  onAutoplayBlocked,
 }) => {
   const { user } = useAuth();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -92,6 +97,7 @@ export const ReelCardItem: React.FC<ReelCardItemProps> = ({
         playPromise.catch(() => {
           // Autoplay policy fallback: mute and retry
           video.muted = true;
+          onAutoplayBlocked();
           void video.play().catch(() => {});
         });
       }
@@ -100,7 +106,18 @@ export const ReelCardItem: React.FC<ReelCardItemProps> = ({
     }
 
     return () => video.pause();
-  }, [isActive, showComments]);
+  }, [isActive, showComments, onAutoplayBlocked]);
+
+  const handleToggleMute = () => {
+    const nextMuted = !isMuted;
+    if (videoRef.current) {
+      // Write the media property during the trusted click gesture. This is
+      // required by Safari/PWA autoplay policies and avoids a two-tap toggle.
+      videoRef.current.muted = nextMuted;
+      if (!nextMuted) void videoRef.current.play().catch(() => {});
+    }
+    onMutedChange(nextMuted);
+  };
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
@@ -279,9 +296,10 @@ export const ReelCardItem: React.FC<ReelCardItemProps> = ({
 
       {/* Floating Mute/Unmute Control (Top Right) */}
       <button
-        onClick={onToggleMute}
+        type="button"
+        onClick={handleToggleMute}
         aria-label={isMuted ? "Unmute audio" : "Mute audio"}
-        className="absolute top-16 lg:top-4 right-4 z-30 p-2.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 text-white hover:scale-110 active:scale-90 transition-transform cursor-pointer shadow-xl"
+        className="absolute right-4 top-16 z-30 flex h-11 min-w-11 items-center justify-center rounded-full border border-white/20 bg-black/50 px-3 text-white shadow-xl backdrop-blur-xl transition-transform hover:scale-105 active:scale-95 lg:top-4"
       >
         {isMuted ? (
           <VolumeX className="h-4 w-4 text-pink-300" />
@@ -289,6 +307,17 @@ export const ReelCardItem: React.FC<ReelCardItemProps> = ({
           <Volume2 className="h-4 w-4 text-cyan-300" />
         )}
       </button>
+
+      {showSoundHint && isActive && isMuted && (
+        <button
+          type="button"
+          onClick={handleToggleMute}
+          className="absolute left-1/2 top-[calc(var(--sat)+4.5rem)] z-40 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-black/70 px-4 text-xs font-bold text-white shadow-xl backdrop-blur-xl transition-colors hover:bg-black/85"
+        >
+          <Volume2 className="h-4 w-4" aria-hidden="true" />
+          <span>Tap to turn on sound</span>
+        </button>
+      )}
 
       {/* Center Double-Tap Animated Heart Overlay */}
       {showDoubleTapHeart && (
@@ -327,12 +356,8 @@ export const ReelCardItem: React.FC<ReelCardItemProps> = ({
           <Link href={`/profile/${reel.author.username}`}>
             <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-500 shadow-xl hover:scale-105 transition-transform">
               <div className="w-full h-full rounded-full overflow-hidden bg-black">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={
-                    reel.author.avatarUrl ||
-                    "/mixchat-icon.png"
-                  }
+                <AvatarImage
+                  src={reel.author.avatarUrl}
                   alt={reel.author.displayName}
                   className="w-full h-full object-cover"
                 />

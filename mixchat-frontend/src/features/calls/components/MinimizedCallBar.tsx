@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
+import { AvatarImage } from '@/shared/components/ui/AvatarImage';
 import { Maximize2, PhoneOff, Phone, Video } from 'lucide-react';
 import type { CallParticipantDto } from '@/services/calls/callsService';
 
@@ -40,20 +40,11 @@ export function MinimizedCallBar({
         className="relative w-10 h-10 rounded-full overflow-hidden border border-white/20 bg-slate-800 cursor-pointer"
         onClick={onRestore}
       >
-        {typeof partner?.avatarUrl === 'string' && partner.avatarUrl ? (
-          <Image
-            src={partner.avatarUrl}
-            alt={name}
-            fill
-            className="object-cover"
-            sizes="40px"
-            unoptimized
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-indigo-600 to-sky-500 text-white">
-            {name.charAt(0).toUpperCase()}
-          </div>
-        )}
+        <AvatarImage
+          src={partner?.avatarUrl}
+          alt={name}
+          className="h-full w-full object-cover"
+        />
         <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-slate-950" />
       </div>
 

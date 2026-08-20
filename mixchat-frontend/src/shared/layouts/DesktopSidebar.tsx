@@ -56,7 +56,7 @@ export const DesktopSidebar: React.FC = () => {
   ];
 
   const displayName = user?.displayName || user?.username || "MixChat User";
-  const avatarUrl = user?.avatarUrl || "/mixchat-icon.png";
+  const avatarUrl = user?.avatarUrl;
 
   return (
     <>

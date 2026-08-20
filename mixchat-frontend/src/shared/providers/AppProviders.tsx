@@ -6,6 +6,7 @@ import { AuthProvider } from "./AuthProvider";
 import { CallProvider } from "@/features/calls/context/CallProvider";
 import { NetworkProvider } from "./NetworkProvider";
 import { ServiceWorkerRegister } from "../components/pwa/ServiceWorkerRegister";
+import { PwaZoomGuard } from "../components/pwa/PwaZoomGuard";
 import { OfflineBanner } from "../components/pwa/OfflineBanner";
 
 export const AppProviders: React.FC<{ children: React.ReactNode }> = ({
@@ -29,6 +30,7 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({
         <AuthProvider>
           <CallProvider>
             <ServiceWorkerRegister />
+            <PwaZoomGuard />
             <OfflineBanner />
             {children}
           </CallProvider>

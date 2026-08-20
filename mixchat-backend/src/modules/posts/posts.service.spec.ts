@@ -187,6 +187,55 @@ describe('PostsService', () => {
   });
 
   describe('createPost', () => {
+    it('persists and returns a validated text background theme', async () => {
+      const mockCreated = {
+        id: 'post-themed',
+        authorId: 'user-1',
+        content: 'A themed thought',
+        visibility: PostVisibility.PUBLIC,
+        locationTag: null,
+        backgroundTheme: 'velvet',
+        likesCount: 0,
+        commentsCount: 0,
+        repostsCount: 0,
+        editedAt: null,
+        createdAt: new Date(),
+        author: {
+          id: 'user-1',
+          username: 'alice',
+          displayName: 'Alice',
+          avatarUrl: null,
+          isVerified: false,
+          isPremium: false,
+        },
+        media: [],
+      };
+      mockPrisma.post.create.mockResolvedValue(mockCreated);
+      mockPrisma.user.update.mockResolvedValue({});
+
+      const result = await service.createPost('user-1', {
+        content: 'A themed thought',
+        backgroundTheme: 'velvet',
+      });
+
+      expect(result.backgroundTheme).toBe('velvet');
+      expect(mockPrisma.post.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ backgroundTheme: 'velvet' }),
+        }),
+      );
+    });
+
+    it('rejects a background theme when media is attached', async () => {
+      await expect(
+        service.createPost('user-1', {
+          content: 'Invalid themed media post',
+          backgroundTheme: 'cyber',
+          mediaObjectIds: ['00000000-0000-4000-8000-000000000001'],
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
     it('should create a text-only post successfully', async () => {
       const mockCreated = {
         id: 'post-1',

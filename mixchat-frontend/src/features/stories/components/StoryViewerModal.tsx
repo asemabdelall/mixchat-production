@@ -385,7 +385,7 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({
               className="flex items-center gap-2.5 group"
             >
               <Avatar
-                src={currentStory.author.avatarUrl || ""}
+                src={currentStory.author.avatarUrl}
                 alt={currentStory.author.displayName}
                 size="sm"
               />

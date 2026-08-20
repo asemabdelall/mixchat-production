@@ -24,6 +24,7 @@ export const MentionText: React.FC<MentionTextProps> = ({
 
   return (
     <span
+      dir="auto"
       className={`whitespace-pre-wrap break-words leading-relaxed ${className}`}
     >
       {parts.map((part, index) => {

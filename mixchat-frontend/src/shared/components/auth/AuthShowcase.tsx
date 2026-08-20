@@ -2,7 +2,6 @@
 
 import React from "react";
 import Image from "next/image";
-import { MessageSquare, Video } from "lucide-react";
 
 export const AuthShowcase: React.FC = () => {
   return (
@@ -37,39 +36,6 @@ export const AuthShowcase: React.FC = () => {
         <p className="text-sm xl:text-base text-slate-300/80 max-w-lg mt-4 leading-relaxed">
           Experience instant messaging, vibrant reels, and daily stories all in one place.
         </p>
-      </div>
-
-      {/* Clean Feature Cards */}
-      <div className="relative z-10 my-8 space-y-4 max-w-md">
-        {/* Card 1: Chat */}
-        <div className="rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-4 shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all hover:bg-white/[0.06]">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-600/30 shrink-0">
-              <MessageSquare className="w-5 h-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="text-sm font-semibold text-white block">Instant Messages & Groups</span>
-              <p className="text-xs text-slate-400 truncate mt-0.5">
-                Chat seamlessly with media, voice, and reactions
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 2: Stories & Reels */}
-        <div className="rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-4 shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all hover:bg-white/[0.06]">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-pink-600 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-pink-600/30 shrink-0">
-              <Video className="w-5 h-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="text-sm font-semibold text-white block">Reels & Daily Stories</span>
-              <p className="text-xs text-slate-400 truncate mt-0.5">
-                Share your moments and watch trending videos
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Simple Clean Footer */}

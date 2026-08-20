@@ -1436,6 +1436,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/map/places/reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resolve the user-selected coordinates to a nearby place
+         * @description User-triggered reverse geocoding with server-side rate limiting and caching. Coordinates are not persisted.
+         */
+        post: operations["MapController_reverseGeocode_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/map/settings": {
         parameters: {
             query?: never;
@@ -2657,6 +2677,12 @@ export interface components {
              */
             locationTag?: string;
             /**
+             * @description Visual theme for a text-only post
+             * @example velvet
+             * @enum {string}
+             */
+            backgroundTheme?: "sunset" | "velvet" | "cyber" | "neon" | "emerald";
+            /**
              * @description Ordered array of MediaObject IDs attached to this post (max 10)
              * @example [
              *       "123e4567-e89b-12d3-a456-426614174000"
@@ -2728,6 +2754,11 @@ export interface components {
             visibility: "PUBLIC" | "FOLLOWERS" | "CLOSE_FRIENDS";
             /** @example San Francisco, CA */
             locationTag?: string | null;
+            /**
+             * @example velvet
+             * @enum {string|null}
+             */
+            backgroundTheme?: "sunset" | "velvet" | "cyber" | "neon" | "emerald" | null;
             media: components["schemas"]["PostMediaItemDto"][];
             stats: components["schemas"]["PostStatsDto"];
             viewer: components["schemas"]["PostViewerDto"];
@@ -2762,6 +2793,12 @@ export interface components {
              * @example New York, NY
              */
             locationTag?: string;
+            /**
+             * @description Visual theme for a text-only post
+             * @example velvet
+             * @enum {string}
+             */
+            backgroundTheme?: "sunset" | "velvet" | "cyber" | "neon" | "emerald";
         };
         LikeResponseDto: {
             /** @example true */
@@ -3330,6 +3367,35 @@ export interface components {
              * @example true
              */
             isCompleted?: boolean;
+        };
+        ReverseGeocodeDto: {
+            /** @example 29.3759 */
+            latitude: number;
+            /** @example 47.9774 */
+            longitude: number;
+            /** @example en-US */
+            language?: string;
+        };
+        PlaceSuggestionDto: {
+            /** @example Kuwait City, Kuwait */
+            label: string;
+            /** @example Kuwait City */
+            city?: Record<string, never> | null;
+            /** @example Al Asimah */
+            region?: Record<string, never> | null;
+            /** @example Kuwait */
+            country?: Record<string, never> | null;
+            /** @example openstreetmap */
+            provider: string;
+            /** @example © OpenStreetMap contributors */
+            attribution: string;
+            /**
+             * @example [
+             *       "Souq Sharq, Kuwait City",
+             *       "Kuwait City, Al Asimah, Kuwait"
+             *     ]
+             */
+            alternatives: string[];
         };
         LocationSettingsResponseDto: {
             /**
@@ -6634,6 +6700,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WatchTelemetryResponseDto"];
+                };
+            };
+        };
+    };
+    MapController_reverseGeocode_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReverseGeocodeDto"];
+            };
+        };
+        responses: {
+            /** @description Nearest place label */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlaceSuggestionDto"];
                 };
             };
         };
